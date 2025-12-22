@@ -1,4 +1,4 @@
-baseURL: "https://nmochea.github.io/writeups/"
+baseURL: "https://nmochea.github.io/"
 languageCode: "en-us"
 title: "Neilmark Ochea / 0xnmo"
 theme: "PaperMod"
@@ -74,11 +74,11 @@ menu:
   main:
     - identifier: posts
       name: Posts
-      url: /writeups/posts/
+      url: /posts/
       weight: 10
     - identifier: Tags
       name: Tags
-      url: /writeups/tags/
+      url: /tags/
       weight: 20
     - identifier: pewpew
       name: Pewpew!
