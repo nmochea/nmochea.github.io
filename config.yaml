@@ -55,7 +55,7 @@ params:
     Content: |
       I just love exploring security vulnerabilities and hacking things.
       
-      Security Researcher **@mobilehackinglab**
+      Security Researcher |
 
   socialIcons:
     - name: linkedin

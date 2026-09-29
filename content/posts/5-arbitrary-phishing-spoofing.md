@@ -1,6 +1,6 @@
 ---
 date: "2025-12-22T12:17:51+08:00"
-draft: true
+draft: false
 title: "Scam Shield Logic Flaw Enables Phishing Alert Spoofing for Any Sender ID or Number"
 summary: "A flaw in the Redacted app’s Scam Shield allows external Intents to trigger fake phishing alerts, letting malicious application or crafted deeplinks falsely flag legitimate sender IDs or phone numbers."
 
