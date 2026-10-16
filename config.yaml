@@ -10,6 +10,7 @@ params:
   description: "ExampleSite description"
   author: Me
   disableThemeToggle: false
+  defaultTheme: dark
   ShowReadingTime: false
   ShowShareButtons: false
   ShowPostNavLinks: false
