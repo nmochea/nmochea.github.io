@@ -6,8 +6,15 @@
     <description>Recent content in Posts on Neilmark Ochea / 0xnmo</description>
     <generator>Hugo -- 0.152.2</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 29 Sep 2026 12:18:25 +0800</lastBuildDate>
+    <lastBuildDate>Fri, 16 Oct 2026 12:03:23 +0800</lastBuildDate>
     <atom:link href="https://nmochea.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Arbitrary Content and URL Injection in Paypal via Deeplink</title>
+      <link>https://nmochea.github.io/posts/arbitrary-content_and_url-injection-in-paypal/</link>
+      <pubDate>Fri, 16 Oct 2026 12:03:23 +0800</pubDate>
+      <guid>https://nmochea.github.io/posts/arbitrary-content_and_url-injection-in-paypal/</guid>
+      <description>A content spoofing vulnerability exists due to unsanitized parameters, allowing in Arbitrary Text and URL injection in Paypal Android.</description>
+    </item>
     <item>
       <title>Arbitrary File Write and File Overwrite via Exposed JSBridge in Bing Android</title>
       <link>https://nmochea.github.io/posts/write-overwrite-arbitrary-files-via-exposed-jsbridge/</link>
