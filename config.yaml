@@ -9,7 +9,6 @@ params:
   title: Writeups
   description: "ExampleSite description"
   author: Me
-  DateFormat: "November 17, 2025"
   disableThemeToggle: false
   ShowReadingTime: false
   ShowShareButtons: false
@@ -55,7 +54,7 @@ params:
     Content: |
       I just love exploring security vulnerabilities and hacking things.
       
-      Security Researcher |
+      Security Researcher
 
   socialIcons:
     - name: linkedin

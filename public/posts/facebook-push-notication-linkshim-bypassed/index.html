@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Linkshim Bypassed in Facebook Push Notication via Double URL Encoding | Neilmark Ochea / 0xnmo</title>
+<meta name="keywords" content="">
+<meta name="description" content="A persistent open redirect vulnerability was discovered in Facebook’s Push Notification endpoint due to improper validation of the ?ref= parameter, allowing attackers to redirect users to malicious sites and potentially facilitate phishing attacks.">
+<meta name="author" content="Me">
+<link rel="canonical" href="https://nmochea.github.io/posts/facebook-push-notication-linkshim-bypassed/">
+<link crossorigin="anonymous" href="https://nmochea.github.io/assets/css/stylesheet.fd5566c526ae48aadabd950798a2dc3568536401560eae5caac3765a42a9e7b5.css" integrity="sha256-/VVmxSauSKravZUHmKLcNWhTZAFWDq5cqsN2WkKp57U=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://nmochea.github.io/%3Clink%20/%20abs%20url%3E">
+<link rel="icon" type="image/png" sizes="16x16" href="https://nmochea.github.io/%3Clink%20/%20abs%20url%3E">
+<link rel="icon" type="image/png" sizes="32x32" href="https://nmochea.github.io/%3Clink%20/%20abs%20url%3E">
+<link rel="apple-touch-icon" href="https://nmochea.github.io/%3Clink%20/%20abs%20url%3E">
+<link rel="mask-icon" href="https://nmochea.github.io/%3Clink%20/%20abs%20url%3E">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://nmochea.github.io/posts/facebook-push-notication-linkshim-bypassed/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://nmochea.github.io/posts/facebook-push-notication-linkshim-bypassed/">
+  <meta property="og:site_name" content="Neilmark Ochea / 0xnmo">
+  <meta property="og:title" content="Linkshim Bypassed in Facebook Push Notication via Double URL Encoding">
+  <meta property="og:description" content="A persistent open redirect vulnerability was discovered in Facebook’s Push Notification endpoint due to improper validation of the ?ref= parameter, allowing attackers to redirect users to malicious sites and potentially facilitate phishing attacks.">
+  <meta property="og:locale" content="en-us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-11-16T23:12:36+08:00">
+    <meta property="article:modified_time" content="2025-11-16T23:12:36+08:00">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Linkshim Bypassed in Facebook Push Notication via Double URL Encoding">
+<meta name="twitter:description" content="A persistent open redirect vulnerability was discovered in Facebook’s Push Notification endpoint due to improper validation of the ?ref= parameter, allowing attackers to redirect users to malicious sites and potentially facilitate phishing attacks.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://nmochea.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Linkshim Bypassed in Facebook Push Notication via Double URL Encoding",
+      "item": "https://nmochea.github.io/posts/facebook-push-notication-linkshim-bypassed/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Linkshim Bypassed in Facebook Push Notication via Double URL Encoding",
+  "name": "Linkshim Bypassed in Facebook Push Notication via Double URL Encoding",
+  "description": "A persistent open redirect vulnerability was discovered in Facebook’s Push Notification endpoint due to improper validation of the ?ref= parameter, allowing attackers to redirect users to malicious sites and potentially facilitate phishing attacks.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Summary A persistent open redirect vulnerability was identified in Facebook’s mobile Push Notification endpoint, allowing attackers to bypass Linkshim and redirect users to malicious sites.\nhttps://p.facebook.com/notifications/client/push/enabled/ The issue was caused by improper validation of the ?ref= parameter, which allowed attackers to craft a URL that forces Facebook to redirect users to an external website. Although Facebook normally protects users through Linkshim, this specific endpoint failed to sanitize deeply encoded redirect payloads, resulting in a successful open redirect.\nRoot Cause Analysis When inspecting the source code of the push-notification page, a suspicious JavaScript object appeared:\n[ upsell: null, redirectUrl: \"{}\", enabledUrl: null ] The presence of redirectUrl indicated that the endpoint supports redirect behavior when a ?ref= parameter is supplied. Normally, Facebook sanitizes redirect parameters, but this endpoint failed to validate deeply encoded values.\nInitial attempts such as:\n?ref=https://evil.com or:\n?ref=https%3A%2F%2Fevil.com did not trigger any redirect.\nHowever, stacking additional encoded slashes finally bypassed validation:\nhttps%3A%2F%2F%2Fevil%2ecom This broke the validation logic and caused the browser to treat it as a valid external URL. As a result, Facebook rendered the page and immediately redirected the user to the attacker-controlled domain.\nThis enabled a full open redirect to any external website.\nAttack Flow User clicks a crafted URL containing a malicious ref value. The server reads the unsanitized ref parameter and assigns it to redirectUrl. Facebook’s redirect logic attempts to normalize the URL. Over-encoded slashes bypass the domain validation. The browser interprets the payload as a valid absolute external URL. The user is redirected to an attacker-controlled site (phishing, malware, credential theft). Proof of Concept (PoC) A working payload that redirects users to https://evil.com:\nhttps://p.facebook.com/notifications/client/push/enabled/?ref=https%3A%2F%2F%2Fevil%2ecom Decoded, this becomes an unusual triple-slash pattern:\nhttps:///evil.com When evaluated by the browser, it becomes:\nhttps://evil.com and the redirect triggers successfully.\nAttempts to perform XSS on this endpoint failed due to Facebook’s strict hex-encoding filters and Linkshim, but the open redirect itself is still a security concern, especially for phishing.\nSteps to Reproduce Visit the endpoint:\nhttps://p.facebook.com/notifications/client/push/enabled/ Test a normal redirect:\n?ref=https://example.com → No redirect\nTest an encoded redirect:\n?ref=https%3A%2F%2Fexample.com → Still no redirect\nUse a deeply encoded triple-slash payload:\n?ref=https%3A%2F%2F%2Fevil%2ecom Full exploit URL:\nhttps://p.facebook.com/notifications/client/push/enabled/?ref=https%3A%2F%2F%2Fevil%2ecom Result:\nhttps://evil.com Disclosure Timeline September 22, 2020 — Reported to Facebook Whitehat September 23, 2020 — Facebook team reproduced and began investigation September 28, 2020 — Provided additional technical details October 08, 2020 — Patch deployed and vulnerability fixed October 21, 2020 — Bounty awarded ",
+  "wordCount" : "401",
+  "inLanguage": "en",
+  "datePublished": "2025-11-16T23:12:36+08:00",
+  "dateModified": "2025-11-16T23:12:36+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "Me"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://nmochea.github.io/posts/facebook-push-notication-linkshim-bypassed/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Neilmark Ochea / 0xnmo",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://nmochea.github.io/%3Clink%20/%20abs%20url%3E"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://nmochea.github.io/" accesskey="h" title="0xnmo (Alt + H)">
+                <img src="https://nmochea.github.io/apple-touch-icon.png" alt="" aria-label="logo"
+                    height="35">0xnmo</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://nmochea.github.io/posts/" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://nmochea.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://mobilehackinglab.com" title="Pewpew!">
+                    <span>Pewpew!</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://nmochea.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://nmochea.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Linkshim Bypassed in Facebook Push Notication via Double URL Encoding
+    </h1>
+    <div class="post-meta"><span title='2025-11-16 23:12:36 +0800 +08'>November 16, 2025</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>401 words</span>&nbsp;·&nbsp;<span>Me</span>
+
+</div>
+  </header> 
+  <div class="post-content"><h3 id="summary"><strong>Summary</strong><a hidden class="anchor" aria-hidden="true" href="#summary">#</a></h3>
+<p>A <strong>persistent open redirect</strong> vulnerability was identified in Facebook’s mobile Push Notification endpoint, allowing attackers to bypass Linkshim and redirect users to malicious sites.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">https://p.facebook.com/notifications/client/push/enabled/
+</span></span></code></pre></div><p>The issue <strong>was caused by improper validation</strong> of the <strong><code>?ref=</code> parameter</strong>, which allowed attackers to craft a URL that <strong>forces Facebook to redirect users to an external website</strong>. Although Facebook normally protects users through <strong>Linkshim</strong>, this specific endpoint <strong>failed to sanitize deeply encoded redirect payloads</strong>, resulting in a <strong>successful open redirect</strong>.</p>
+<hr>
+<h3 id="root-cause-analysis"><strong>Root Cause Analysis</strong><a hidden class="anchor" aria-hidden="true" href="#root-cause-analysis">#</a></h3>
+<p>When inspecting the source code of the push-notification page, a suspicious JavaScript object appeared:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="line"><span class="cl"><span class="p">[</span> <span class="nx">upsell</span><span class="o">:</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">redirectUrl</span><span class="o">:</span> <span class="s2">&#34;{}&#34;</span><span class="p">,</span> <span class="nx">enabledUrl</span><span class="o">:</span> <span class="kc">null</span> <span class="p">]</span>
+</span></span></code></pre></div><p>The presence of <strong><code>redirectUrl</code></strong> indicated that the endpoint supports redirect behavior when a <strong><code>?ref=</code> parameter</strong> is supplied. Normally, Facebook sanitizes redirect parameters, but this endpoint <strong>failed to validate deeply encoded values</strong>.</p>
+<p>Initial attempts such as:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">?ref=https://evil.com
+</span></span></code></pre></div><p>or:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">?ref=https%3A%2F%2Fevil.com
+</span></span></code></pre></div><p>did <strong>not</strong> trigger any redirect.</p>
+<p>However, stacking additional encoded slashes finally bypassed validation:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">https%3A%2F%2F%2Fevil%2ecom
+</span></span></code></pre></div><p>This <strong>broke the validation logic</strong> and caused the browser to treat it as a valid external URL. As a result, Facebook rendered the page and <strong>immediately redirected the user to the attacker-controlled domain</strong>.</p>
+<p>This enabled a <strong>full open redirect</strong> to any external website.</p>
+<h3 id="attack-flow"><strong>Attack Flow</strong><a hidden class="anchor" aria-hidden="true" href="#attack-flow">#</a></h3>
+<ol>
+<li>User clicks a <strong>crafted URL</strong> containing a malicious <code>ref</code> value.</li>
+<li>The server reads the <strong>unsanitized <code>ref</code> parameter</strong> and assigns it to <code>redirectUrl</code>.</li>
+<li>Facebook’s redirect logic attempts to <strong>normalize the URL</strong>.</li>
+<li><strong>Over-encoded slashes</strong> bypass the domain validation.</li>
+<li>The browser interprets the payload as a <strong>valid absolute external URL</strong>.</li>
+<li>The user is <strong>redirected to an attacker-controlled site</strong> (phishing, malware, credential theft).</li>
+</ol>
+<h3 id="proof-of-concept-poc"><strong>Proof of Concept (PoC)</strong><a hidden class="anchor" aria-hidden="true" href="#proof-of-concept-poc">#</a></h3>
+<p>A working payload that redirects users to <code>https://evil.com</code>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">https://p.facebook.com/notifications/client/push/enabled/?ref=https%3A%2F%2F%2Fevil%2ecom
+</span></span></code></pre></div><p>Decoded, this becomes an unusual triple-slash pattern:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">https:///evil.com
+</span></span></code></pre></div><p>When evaluated by the browser, it becomes:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">https://evil.com
+</span></span></code></pre></div><p>and the <strong>redirect triggers successfully</strong>.</p>
+<p>Attempts to perform XSS on this endpoint failed due to <strong>Facebook’s strict hex-encoding filters and Linkshim</strong>, but the <strong>open redirect itself is still a security concern</strong>, especially for phishing.</p>
+<h3 id="steps-to-reproduce"><strong>Steps to Reproduce</strong><a hidden class="anchor" aria-hidden="true" href="#steps-to-reproduce">#</a></h3>
+<ol>
+<li>
+<p>Visit the endpoint:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">https://p.facebook.com/notifications/client/push/enabled/
+</span></span></code></pre></div></li>
+<li>
+<p>Test a normal redirect:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">?ref=https://example.com
+</span></span></code></pre></div><p>→ <strong>No redirect</strong></p>
+</li>
+<li>
+<p>Test an encoded redirect:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">?ref=https%3A%2F%2Fexample.com
+</span></span></code></pre></div><p>→ <strong>Still no redirect</strong></p>
+</li>
+<li>
+<p>Use a <strong>deeply encoded triple-slash payload</strong>:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">?ref=https%3A%2F%2F%2Fevil%2ecom
+</span></span></code></pre></div></li>
+<li>
+<p>Full exploit URL:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">https://p.facebook.com/notifications/client/push/enabled/?ref=https%3A%2F%2F%2Fevil%2ecom
+</span></span></code></pre></div></li>
+<li>
+<p>Result:</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">https://evil.com
+</span></span></code></pre></div></li>
+</ol>
+<h3 id="disclosure-timeline"><strong>Disclosure Timeline</strong><a hidden class="anchor" aria-hidden="true" href="#disclosure-timeline">#</a></h3>
+<ul>
+<li><strong>September 22, 2020</strong> — Reported to Facebook Whitehat</li>
+<li><strong>September 23, 2020</strong> — Facebook team reproduced and began investigation</li>
+<li><strong>September 28, 2020</strong> — Provided additional technical details</li>
+<li><strong>October 08, 2020</strong> — Patch deployed and vulnerability fixed</li>
+<li><strong>October 21, 2020</strong> — Bounty awarded</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    <footer class="footer">
+    <span>&copy; 2026 Neilmark Ochea / 0xnmo</span>
+</footer></body>
+
+</html>
