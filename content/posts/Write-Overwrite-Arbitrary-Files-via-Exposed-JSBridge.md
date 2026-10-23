@@ -25,7 +25,6 @@ goldmark:
     unsafe: true
 ---
 
-
 ## **Summary**
 An attacker can exploit this issue to open malicious web content in the Bing Android application via deeplink and use the exposed JSBridge to write or overwrite files in the current directory.
 

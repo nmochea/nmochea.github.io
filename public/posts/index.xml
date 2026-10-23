@@ -78,7 +78,7 @@
       <link>http://localhost:1313/posts/journey/</link>
       <pubDate>Mon, 16 Nov 2020 19:12:01 +0800</pubDate>
       <guid>http://localhost:1313/posts/journey/</guid>
-      <description></description>
+      <description>&lt;h1 id=&#34;hello-world&#34;&gt;Hello World&lt;/h1&gt;</description>
     </item>
   </channel>
 </rss>
