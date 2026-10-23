@@ -7,8 +7,9 @@ canonifyURLs: true
 params:
   env: production
   title: Writeups
-  description: "ExampleSite description"
-  author: Me
+  description: "Security research, vulnerability writeups, and application security."
+  author: "Neil Mark Ochea"
+
   ShowReadingTime: false
   ShowShareButtons: false
   ShowPostNavLinks: false
@@ -24,37 +25,36 @@ params:
   hideSummary: false
   showtoc: false
   tocopen: false
-  
+
   assets:
-    favicon: "<link / abs url>"
-    favicon16x16: "<link / abs url>"
-    favicon32x32: "<link / abs url>"
-    apple_touch_icon: "<link / abs url>"
-    safari_pinned_tab: "<link / abs url>"
+    favicon: "/favicon.ico"
+    favicon16x16: "/favicon-16x16.png"
+    favicon32x32: "/favicon-32x32.png"
+    apple_touch_icon: "/apple-touch-icon.png"
 
   label:
     text: "0xnmo"
-    icon: /apple-touch-icon.png
+    icon: "/apple-touch-icon.png"
     iconHeight: 35
 
   profileMode:
     enabled: false
-    title: Neil Mark Ochea
-    subtitle: |
-      I just read manga, manhwa, and manhua. When I'm not reading, I'm busy exploring security vulnerabilities and hacking things."
+    title: "Neil Mark Ochea"
+    subtitle: "Security Researcher | Security Consultant"
     buttons:
+      - name: 0xnmo
+        url: https://nmochea.github.io
       - name: Posts
         url: posts
       - name: Tags
         url: tags
 
   homeInfoParams:
-    Title: "Neil Mark Ochea \U0001F577"
-    Content: |
-      I just love exploring security vulnerabilities and hacking things.
-      
-      Security Researcher
-
+    Title: "Neil Mark Ochea 🕷"
+    Content: |-
+      I just love exploring security vulnerabilities and hacking things.<br><br>
+      **Bug Bounty**: [HackerOne Ranked #2](https://hackerone.com/leaderboard/country?year=2023&quarter=1&owasp=a1&country=PH&assetType=WEB_APP&tab=bbp&userTypeTab=individual) | [Bugrap Ranked #6](https://bugrap.io/whiteHats) | [Cybozu Ranked #8](https://cy-psirt.viewer.kintoneapp.com/public/point-ranking)<br>
+      **CVES**: CVE-2025-15569, CVE-2026-2974
   socialIcons:
     - name: linkedin
       url: "https://linkedin.com/in/nmochea"
@@ -70,32 +70,39 @@ params:
 
 menu:
   main:
-    - identifier: posts
-      name: Posts
-      url: /posts/
+    - identifier: 0xnmo
+      name: "⌂ 0xnmo"
+      url: https://nmochea.github.io/
       weight: 10
-    - identifier: Tags
-      name: Tags
-      url: /tags/
+
+    - identifier: posts
+      name: "▤ Posts"
+      url: /posts/
       weight: 20
-    - identifier: pewpew
-      name: Pewpew!
-      url: https://mobilehackinglab.com
+
+    - identifier: tags
+      name: "◆ Tags"
+      url: /tags/
       weight: 30
 
+    - identifier: pewpew
+      name: "⌁ Pewpew!"
+      url: https://vicone.com
+      weight: 40
+
 pygmentsUseClasses: true
+
 markup:
   highlight:
     noClasses: false
-    codeFences: true 
+    codeFences: true
     guessSyntax: true
     lineNos: false
     style: monokai
-    safeMode: unsafe
+    tabWidth: 4
+  goldmark:
+    renderer:
+      unsafe: true
 
 frontmatter:
   format: yaml
-
-goldmark:
-  renderer:
-    unsafe: true

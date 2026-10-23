@@ -2,75 +2,82 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Neilmark Ochea / 0xnmo</title>
-    <link>https://nmochea.github.io/</link>
+    <link>http://localhost:1313/</link>
     <description>Recent content on Neilmark Ochea / 0xnmo</description>
-    <generator>Hugo -- 0.152.2</generator>
+    <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 16 Oct 2026 12:03:23 +0800</lastBuildDate>
-    <atom:link href="https://nmochea.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 23 Oct 2026 23:28:02 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Unauthorized Device Command and Control</title>
+      <link>http://localhost:1313/posts/unauthorized-device-command-and-control/</link>
+      <pubDate>Fri, 23 Oct 2026 23:28:02 +0800</pubDate>
+      <guid>http://localhost:1313/posts/unauthorized-device-command-and-control/</guid>
+      <description>The exported activity lacked caller validation, permission checks, and input sanitization, allowing any application to pass attacker-controlled data into the AI pipeline and trigger sensitive device-control operations through a privileged backend.</description>
+    </item>
     <item>
       <title>Arbitrary Content and URL Injection in Paypal via Deeplink</title>
-      <link>https://nmochea.github.io/posts/arbitrary-content_and_url-injection-in-paypal/</link>
+      <link>http://localhost:1313/posts/arbitrary-content_and_url-injection-in-paypal/</link>
       <pubDate>Fri, 16 Oct 2026 12:03:23 +0800</pubDate>
-      <guid>https://nmochea.github.io/posts/arbitrary-content_and_url-injection-in-paypal/</guid>
+      <guid>http://localhost:1313/posts/arbitrary-content_and_url-injection-in-paypal/</guid>
       <description>A content spoofing vulnerability exists due to unsanitized parameters, allowing in Arbitrary Text and URL injection in Paypal Android.</description>
     </item>
     <item>
       <title>Arbitrary File Write and File Overwrite via Exposed JSBridge in Bing Android</title>
-      <link>https://nmochea.github.io/posts/write-overwrite-arbitrary-files-via-exposed-jsbridge/</link>
+      <link>http://localhost:1313/posts/write-overwrite-arbitrary-files-via-exposed-jsbridge/</link>
       <pubDate>Tue, 29 Sep 2026 12:18:25 +0800</pubDate>
-      <guid>https://nmochea.github.io/posts/write-overwrite-arbitrary-files-via-exposed-jsbridge/</guid>
+      <guid>http://localhost:1313/posts/write-overwrite-arbitrary-files-via-exposed-jsbridge/</guid>
       <description>The Bing Android application allows attacker-controlled URLs to be loaded via a deeplink into a WebView that exposes a JavaScript bridge to the loaded page.</description>
     </item>
     <item>
       <title>Scam Shield Logic Flaw Enables Phishing Alert Spoofing for Any Sender ID or Number</title>
-      <link>https://nmochea.github.io/posts/arbitrary-phishing-spoofing/</link>
+      <link>http://localhost:1313/posts/arbitrary-phishing-spoofing/</link>
       <pubDate>Mon, 22 Dec 2025 12:17:51 +0800</pubDate>
-      <guid>https://nmochea.github.io/posts/arbitrary-phishing-spoofing/</guid>
+      <guid>http://localhost:1313/posts/arbitrary-phishing-spoofing/</guid>
       <description>A flaw in the Redacted app’s Scam Shield allows external Intents to trigger fake phishing alerts, letting malicious application or crafted deeplinks falsely flag legitimate sender IDs or phone numbers.</description>
     </item>
     <item>
       <title>DOM-Based JavaScript Execution in Xiaomi Browser Reader Mode via &lt;title&gt; HTML Injection (Android)</title>
-      <link>https://nmochea.github.io/posts/xiaomi-browser-mobile-xss/</link>
+      <link>http://localhost:1313/posts/xiaomi-browser-mobile-xss/</link>
       <pubDate>Sun, 16 Nov 2025 23:22:28 +0800</pubDate>
-      <guid>https://nmochea.github.io/posts/xiaomi-browser-mobile-xss/</guid>
-      <description>A DOM-based Cross-Site Scripting (XSS) vulnerability was discovered in Xiaomi Browser’s Read Mode due to insufficient sanitization of the HTML &lt;!-- raw HTML omitted --&gt; tag, allowing arbitrary HTML or JavaScript to be executed via innerHTML.</description>
+      <guid>http://localhost:1313/posts/xiaomi-browser-mobile-xss/</guid>
+      <description>A DOM-based Cross-Site Scripting (XSS) vulnerability was discovered in Xiaomi Browser’s Read Mode due to insufficient sanitization of the HTML &lt;title&gt; tag, allowing arbitrary HTML or JavaScript to be executed via innerHTML.</description>
     </item>
     <item>
       <title>Referrer Data Leakage in Facebook via Unvalidated data_uri Parameter</title>
-      <link>https://nmochea.github.io/posts/facebook-leak-referrer-data/</link>
+      <link>http://localhost:1313/posts/facebook-leak-referrer-data/</link>
       <pubDate>Sun, 16 Nov 2025 23:17:09 +0800</pubDate>
-      <guid>https://nmochea.github.io/posts/facebook-leak-referrer-data/</guid>
+      <guid>http://localhost:1313/posts/facebook-leak-referrer-data/</guid>
       <description>An open redirect vulnerability was discovered in Facebook’s Privacy Checkup endpoint due to the ?back_uri= parameter being processed without any security filtering, allowing attackers to redirect users to malicious website.</description>
     </item>
     <item>
       <title>Linkshim Bypassed in Facebook Push Notication via Double URL Encoding</title>
-      <link>https://nmochea.github.io/posts/facebook-push-notication-linkshim-bypassed/</link>
+      <link>http://localhost:1313/posts/facebook-push-notication-linkshim-bypassed/</link>
       <pubDate>Sun, 16 Nov 2025 23:12:36 +0800</pubDate>
-      <guid>https://nmochea.github.io/posts/facebook-push-notication-linkshim-bypassed/</guid>
+      <guid>http://localhost:1313/posts/facebook-push-notication-linkshim-bypassed/</guid>
       <description>A persistent open redirect vulnerability was discovered in Facebook’s Push Notification endpoint due to improper validation of the ?ref= parameter, allowing attackers to redirect users to malicious sites and potentially facilitate phishing attacks.</description>
     </item>
     <item>
       <title>Cross-Site Scripting in Opera Browser Reader Mode via Malicious &lt;title&gt; Tag (Android)</title>
-      <link>https://nmochea.github.io/posts/opera-browser-mobile-xss/</link>
+      <link>http://localhost:1313/posts/opera-browser-mobile-xss/</link>
       <pubDate>Sun, 16 Nov 2025 22:07:33 +0800</pubDate>
-      <guid>https://nmochea.github.io/posts/opera-browser-mobile-xss/</guid>
-      <description>A reflected Cross-Site Scripting (XSS) vulnerability was discovered in Opera Browser for Android’s Reader Mode due to insufficient sanitization of the HTML &lt;!-- raw HTML omitted --&gt; tag, allowing attackers to execute arbitrary JavaScript, steal sensitive data, or inject malicious content</description>
+      <guid>http://localhost:1313/posts/opera-browser-mobile-xss/</guid>
+      <description>A reflected Cross-Site Scripting (XSS) vulnerability was discovered in Opera Browser for Android’s Reader Mode due to insufficient sanitization of the HTML &lt;title&gt; tag, allowing attackers to execute arbitrary JavaScript, steal sensitive data, or inject malicious content</description>
     </item>
     <item>
       <title>Hacking Staysafe Philippines Contact Tracing Platform</title>
-      <link>https://nmochea.github.io/posts/hacking-staysafe-philippines-contact-tracing-platform/</link>
+      <link>http://localhost:1313/posts/hacking-staysafe-philippines-contact-tracing-platform/</link>
       <pubDate>Thu, 08 Sep 2022 09:35:26 +0800</pubDate>
-      <guid>https://nmochea.github.io/posts/hacking-staysafe-philippines-contact-tracing-platform/</guid>
+      <guid>http://localhost:1313/posts/hacking-staysafe-philippines-contact-tracing-platform/</guid>
       <description>&lt;h2 id=&#34;description&#34;&gt;&lt;strong&gt;Description&lt;/strong&gt;&lt;/h2&gt;
 &lt;p&gt;During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users’ PII.&lt;/p&gt;
 &lt;p&gt;When a user goes to the StaySafe website to create an account or log in, I chose to log in with my Facebook account. After authenticating with Facebook, I noticed it redirected to StaySafe with an endpoint like this:&lt;/p&gt;</description>
     </item>
     <item>
       <title>Journey</title>
-      <link>https://nmochea.github.io/posts/journey/</link>
+      <link>http://localhost:1313/posts/journey/</link>
       <pubDate>Mon, 16 Nov 2020 19:12:01 +0800</pubDate>
-      <guid>https://nmochea.github.io/posts/journey/</guid>
+      <guid>http://localhost:1313/posts/journey/</guid>
       <description></description>
     </item>
   </channel>
