@@ -25,10 +25,10 @@ goldmark:
     unsafe: true
 ---
 
-## **Summary**
+## Summary
 An attacker can exploit this issue to open malicious web content in the Bing Android application via deeplink and use the exposed JSBridge to write or overwrite files in the current directory.
 
-## **Exploit**
+## Exploit
 An attacker remotely triggered the vulnerable flow through the app’s deeplink from a browser, SMS, or email. The deeplink loaded an attacker-controlled URL in the WebView, allowing the page to invoke the exposed JavaScript bridge.
 
 ```html
@@ -65,7 +65,7 @@ In write.html:
 </html>
 ```
 
-## **Technical Details**
+## Technical Details
 
 The vulnerability begins with the application's handling of deeplinks, which allows an attacker to launch the application and load an arbitrary URL in WebView. The WebView is initialized with JavaScript enabled and exposes powerful native interfaces (such as iabSDKJSBridge) to all loaded content, without origin checks or validation. The saveBase64ToImageFile method on this bridge allows arbitrary file writes to the Downloads directory, with attacker-controlled filename and content. If a file with the same name already exists, it is overwritten, leading to file corruption. This is not limited to .txt files; any extension or file type can be targeted.
 
@@ -145,4 +145,21 @@ public static void writeBytes(File file, byte[] data) {
 }
 ```
 
+## Conclusion
+A deeplink is all it takes to load attacker controlled content into Bing's WebView, and from there the exposed `iabSDKJSBridge` does the rest. Since `saveBase64ToImageFile` writes attacker supplied content to an attacker chosen filename with no origin check and no validation, any page loaded through the deeplink can write new files or silently overwrite existing ones in the Downloads directory. No user interaction is needed beyond tapping the initial link, and the file type is not restricted, so this goes well beyond simple text file corruption.
 
+## FAQ
+**What is this?**
+Arbitrary File Write and File Overwrite via Exposed JSBridge on the Bing Android Application.
+
+**How does it work?**
+It's all in the Exploit and Technical Details sections above, read top to bottom.
+
+**Isn't it useless?**
+Not at all. The victim only has to tap a `sapphire://` deeplink from a browser, SMS, or email. No application install, no special permissions, no further interaction once the page loads.
+
+**What's so bad about it?**
+The JSBridge is meant to support the app's own functionality, but it trusts any page the WebView loads, including one the attacker fully controls. That page can write arbitrary files or overwrite existing ones in the Downloads directory, with the attacker choosing both the filename and the content, and since the file type is not restricted, the impact goes beyond ordinary file corruption.
+
+**Why?**
+Because `onNewIntent` passes the deeplink URL straight to the WebView with no validation, and `InAppBrowserWebView` registers `iabSDKJSBridge` without any origin restriction, letting `saveBase64ToImageFile` write or overwrite files using attacker controlled parameters with no checks at all.

@@ -65,13 +65,27 @@
       <description>A reflected Cross-Site Scripting (XSS) vulnerability was discovered in Opera Browser for Android’s Reader Mode due to insufficient sanitization of the HTML &lt;title&gt; tag, allowing attackers to execute arbitrary JavaScript, steal sensitive data, or inject malicious content</description>
     </item>
     <item>
+      <title>Multi-Factor Authentication Bypass in OKX Android application via Exported WelcomeActivity</title>
+      <link>http://localhost:1313/posts/multi-factor-authentication-bypass-in-okx-android-app/</link>
+      <pubDate>Thu, 02 Feb 2023 00:15:53 +0800</pubDate>
+      <guid>http://localhost:1313/posts/multi-factor-authentication-bypass-in-okx-android-app/</guid>
+      <description>A broken multi-factor authentication vulnerability exists in OKX&amp;rsquo;s Android application due to an exported launcher Activity, allowing a locally installed malicious application to bypass the fingerprint-based multi-factor authentication check and resume a logged-in session without credentials.</description>
+    </item>
+    <item>
       <title>Hacking Staysafe Philippines Contact Tracing Platform</title>
       <link>http://localhost:1313/posts/hacking-staysafe-philippines-contact-tracing-platform/</link>
       <pubDate>Thu, 08 Sep 2022 09:35:26 +0800</pubDate>
       <guid>http://localhost:1313/posts/hacking-staysafe-philippines-contact-tracing-platform/</guid>
-      <description>&lt;h2 id=&#34;description&#34;&gt;&lt;strong&gt;Description&lt;/strong&gt;&lt;/h2&gt;
-&lt;p&gt;During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users’ PII.&lt;/p&gt;
-&lt;p&gt;When a user goes to the StaySafe website to create an account or log in, I chose to log in with my Facebook account. After authenticating with Facebook, I noticed it redirected to StaySafe with an endpoint like this:&lt;/p&gt;</description>
+      <description>&lt;h2 id=&#34;key-points-of-this-writeup&#34;&gt;Key points of this writeup&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Discovered a leaked OAuth token&lt;/strong&gt;: StaySafe.ph&amp;rsquo;s Facebook login redirect exposed a long-lived (~59-day) access token directly in the URL. That token alone was enough to impersonate a user, no password required.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Reverse-engineered the mobile app&lt;/strong&gt;: Decompiled &lt;code&gt;ph.staysafe.mobileapp&lt;/code&gt; (v2.1) using Jadx and apktool to dig into how the app worked under the hood.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Accessed sensitive exposure data&lt;/strong&gt;: With just the leaked token, pulled detailed contact-tracing logs showing exposure status (Probable, Suspect, Confirmed, Cleared, Initial), color-coded and dated, including full historical records, not just current data.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Mapped 20+ exposed API endpoints&lt;/strong&gt;: Extracted from the app&amp;rsquo;s JS bundle, covering critical functions like password reset, OTP verification, account activation/deactivation, and account deletion.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Found an exposed, editable backend&lt;/strong&gt;: The Laravel backend source and admin panel were publicly accessible, and editable, leaking massive amounts of PII for millions of users: names, emails, passwords, phone numbers, OTPs, vaccination status, locations, and more.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;technical-details&#34;&gt;Technical Details&lt;/h2&gt;
+&lt;p&gt;During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users&amp;rsquo; PII.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Journey</title>

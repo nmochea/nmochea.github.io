@@ -25,7 +25,7 @@ goldmark:
 ---
 
 
-### **Summary**
+### Summary
 An open redirect vulnerability was discovered in Facebook’s Privacy Checkup endpoint due to the `back_uri` parameter being processed without any security filtering, allowing attackers to redirect users to malicious website.
 
 ```
@@ -34,7 +34,7 @@ https://www.facebook.com/privacy/checking/blocking/
 
 The issue occurred due to improper validation of the `back_uri` parameter. Because this endpoint did **not** pass outbound URLs through Facebook’s **Linkshim** protection mechanism, supplying an external URL such as `https://evil.com` resulted in an immediate redirect without any security checks. This allowed attackers to redirect Facebook users to arbitrary websites, facilitating phishing, malware distribution, and other social‑engineering attacks.
 
-### **Root Cause Analysis**
+### Root Cause Analysis
 
 While reviewing the source code of the Privacy Checkup page, it became clear that the `back_uri` parameter controlled the final redirect destination after users completed or exited the page.
 
@@ -50,7 +50,7 @@ This means:
 
 This effectively created a **Linkshim bypass** via an unvalidated redirect parameter.
 
-### **Attack Flow**
+### Attack Flow
 
 1. Attacker crafts a URL using the vulnerable endpoint with a malicious domain in `back_uri`.
 2. Victim clicks the crafted Facebook link.
@@ -58,7 +58,7 @@ This effectively created a **Linkshim bypass** via an unvalidated redirect param
 4. Once the page processes the `back_uri` parameter, the victim is redirected to the attacker’s domain.
 5. Since Linkshim is bypassed, **no security warning or interstitial page appears**, increasing the effectiveness of phishing or malware attacks.
 
-### **Proof of Concept (PoC)**
+### Proof of Concept (PoC)
 
 Directly injecting an external URL into the `back_uri` parameter triggers an immediate redirect:
 
@@ -76,7 +76,7 @@ Loading this URL results in:
 https://evil.com
 ```
 
-### **Reproduction Steps**
+### Reproduction Steps
 
 1. Visit the target endpoint in a browser:
 
@@ -100,7 +100,7 @@ https://evil.com
 
 5. Observe that Facebook immediately redirects to the attacker‑controlled domain **without Linkshim** or any warning.
 
-### **Disclosure Timeline**
+### Disclosure Timeline
 
 * **October 13, 2020** — Vulnerability reported to Facebook Whitehat.
 * **October 13, 2020** — Facebook team reproduced and began investigating.

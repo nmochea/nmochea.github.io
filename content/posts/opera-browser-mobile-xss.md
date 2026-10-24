@@ -24,7 +24,7 @@ goldmark:
     unsafe: true
 ---
 
-### **Summary**
+### Summary
 A reflected Cross-Site Scripting (XSS) vulnerability was discovered in Opera Browser for Android’s **Reader Mode** due to insufficient sanitization of the HTML `<title>` tag, allowing attackers to execute arbitrary JavaScript, steal sensitive data, or inject malicious content.
 
 
@@ -33,11 +33,11 @@ Although the Reader Mode engine (`opera-distiller://readermode`) safely distills
 As a result, an attacker can embed malicious JavaScript directly inside a `<title>` tag and have it execute **inside the Reader Mode renderer context**, even though the body content is sanitized.
 
 
-### **Root Cause Analysis**
+### Root Cause Analysis
 
 The vulnerability exists in the bridge between native C++ metadata parsing and the Java UI layer, where `<title>` content is processed **without any validation or escaping**.
 
-#### **In ChromiumContent.java**
+#### In ChromiumContent.java
 ```java
 @CalledByNative
 public static void receivedHtmlMetaData(Object obj, String[] strArr) {
@@ -77,7 +77,7 @@ public static void receivedHtmlMetaData(Object obj, String[] strArr) {
 * **No HTML entity encoding**, **no script removal**, and **no sanitization** are performed.
 * The Java layer later sets this title into UI components using methods like `TextView.setText(title)`, which allow script execution in Reader Mode.
 
-#### **In ChromiumContent.java**
+#### In ChromiumContent.java
 - Opera enforces distillation only for the article body:
 ```java
 private String buildReaderModeUrl(String str, String str2) {
@@ -99,7 +99,7 @@ private String buildReaderModeUrl(String str, String str2) {
 * But **metadata (including `<title>`) is extracted before distillation**, making it a bypass vector.
 
 
-### **Attack Flow**
+### Attack Flow
 
 A page containing a malicious title:
 
@@ -116,7 +116,7 @@ A page containing a malicious title:
 4. User activates Reader Mode.
 5. Reader Mode UI renders the title, executing the embedded JavaScript.
 
-### **Proof of Concept (PoC)**
+### Proof of Concept (PoC)
 
 One reliable vector is **Google Calendar tasks**, which allow custom text that gets embedded into HTML titles.
 
@@ -135,7 +135,7 @@ One reliable vector is **Google Calendar tasks**, which allow custom text that g
 </html>
 ```
 
-### **Steps to Reproduce**
+### Steps to Reproduce
 
 1. Create a task with this title:
 
@@ -156,9 +156,29 @@ One reliable vector is **Google Calendar tasks**, which allow custom text that g
    * Clean article body (distilled).
    * JavaScript alert executes immediately due to the unsanitized title.
 
-### **Disclosure Timeline**
+### Disclosure Timeline
 
 * **September 21, 2020** — Vulnerability discovered
 * **September 23, 2020** — Reported to Opera Security
 * **September 25, 2020** — Vendor acknowledged issue
 * **September 29, 2020** — Patch released
+
+
+## Conclusion
+Reader Mode sanitizes the article body, but the title takes a completely different path into the page. The native parser pulls it out before distillation ever runs, hands it to the Java layer with no escaping at all, and the UI renders it straight into the Reader Mode context. A single `<script>` tag inside a `<title>` is enough to execute arbitrary JavaScript, even on a page whose visible content looks perfectly clean and safe.
+
+## FAQ
+**What is this?**
+Reflected Cross-Site Scripting via Malicious `<title>` Tag in Opera Browser Reader Mode (Android).
+
+**How does it work?**
+It's all in the Root Cause Analysis and Attack Flow sections above, read top to bottom.
+
+**Isn't it useless?**
+Not at all. The victim just has to open an attacker controlled page, or even a shared Google Calendar task link, and tap Reader Mode. No application install, no special permissions, nothing else needed.
+
+**What's so bad about it?**
+Reader Mode is meant to strip out scripts and unsafe elements, which is exactly why a user might trust it more than the raw page. But the title bypasses that entire sanitization step, so a user can land on something that looks fully distilled and safe while JavaScript runs in the background, stealing data or injecting content.
+
+**Why?**
+Because `receivedHtmlMetaData()` passes the raw `<title>` value from the native parser straight to the Java UI layer with no HTML entity encoding, no script removal, and no sanitization at all before it gets rendered. It's already fixed as of September 29, 2020, per the timeline above.

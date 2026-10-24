@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Multi-Factor Authentication Bypass in OKX Android application via Exported WelcomeActivity | Neilmark Ochea / 0xnmo</title>
+<meta name="keywords" content="">
+<meta name="description" content="A broken multi-factor authentication vulnerability exists in OKX&rsquo;s Android application due to an exported launcher Activity, allowing a locally installed malicious application to bypass the fingerprint-based multi-factor authentication check and resume a logged-in session without credentials.">
+<meta name="author" content="Neil Mark Ochea">
+<link rel="canonical" href="http://localhost:1313/posts/multi-factor-authentication-bypass-in-okx-android-app/">
+<link crossorigin="anonymous" href="http://localhost:1313/assets/css/stylesheet.e624eaf7b4ad45f3fd806b5e6ead990c75bc9a13fb6e546b3c557f0c8cd301d8.css" integrity="sha256-5iTq97StRfP9gGtebq2ZDHW8mhP7blRrPFV/DIzTAdg=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/multi-factor-authentication-bypass-in-okx-android-app/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+                color-scheme: dark;
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .toc {
+                background: var(--entry);
+            }
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="http://localhost:1313/posts/multi-factor-authentication-bypass-in-okx-android-app/">
+  <meta property="og:site_name" content="Neilmark Ochea / 0xnmo">
+  <meta property="og:title" content="Multi-Factor Authentication Bypass in OKX Android application via Exported WelcomeActivity">
+  <meta property="og:description" content="A broken multi-factor authentication vulnerability exists in OKX’s Android application due to an exported launcher Activity, allowing a locally installed malicious application to bypass the fingerprint-based multi-factor authentication check and resume a logged-in session without credentials.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2023-02-02T00:15:53+08:00">
+    <meta property="article:modified_time" content="2023-02-02T00:15:53+08:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Multi-Factor Authentication Bypass in OKX Android application via Exported WelcomeActivity">
+  <meta name="twitter:description" content="A broken multi-factor authentication vulnerability exists in OKX’s Android application due to an exported launcher Activity, allowing a locally installed malicious application to bypass the fingerprint-based multi-factor authentication check and resume a logged-in session without credentials.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Multi-Factor Authentication Bypass in OKX Android application via Exported WelcomeActivity",
+      "item": "http://localhost:1313/posts/multi-factor-authentication-bypass-in-okx-android-app/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Multi-Factor Authentication Bypass in OKX Android application via Exported WelcomeActivity",
+  "name": "Multi-Factor Authentication Bypass in OKX Android application via Exported WelcomeActivity",
+  "description": "A broken multi-factor authentication vulnerability exists in OKX\u0026rsquo;s Android application due to an exported launcher Activity, allowing a locally installed malicious application to bypass the fingerprint-based multi-factor authentication check and resume a logged-in session without credentials.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Summary A broken multi-factor authentication vulnerability was discovered in OKX’s Android application due to the com.okinc.okex.welcome.WelcomeActivity component being set to android:exported=\"true\". Because this entry point is exported, any other application installed on the device can launch it directly with an explicit Intent instead of going through the app’s normal startup flow. This skips the fingerprint-based multi-factor authentication check that OKX normally enforces when a user reopens the application after an existing session, letting a malicious application resume a logged-in OKX session without the user re-authenticating.\nExploit An attacker locally triggers this vulnerability through a malicious “OKX Bypass” application installed on the victim’s device.\nIntent intent = new Intent(\"android.intent.action.VIEW\"); intent.setComponent(new ComponentName(\"com.okinc.okex.gp\",\"com.okinc.okex.welcome.WelcomeActivity\")); startActivity(intent); Technical Details In AndroidManifest.xml:\nThe WelcomeActivity registered with an intent-filter for MAIN/LAUNCHER it’s also marked exported=\"true\", which means Android will accept Intents sent to it from any other application on the device.\n",
+  "wordCount" : "394",
+  "inLanguage": "en",
+  "datePublished": "2023-02-02T00:15:53+08:00",
+  "dateModified": "2023-02-02T00:15:53+08:00",
+  "author":{
+    "@type": "Person",
+    "name": "Neil Mark Ochea"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/multi-factor-authentication-bypass-in-okx-android-app/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Neilmark Ochea / 0xnmo",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="0xnmo (Alt + H)">
+                <img src="http://localhost:1313/apple-touch-icon.png" alt="" aria-label="logo"
+                    height="35">0xnmo</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="https://nmochea.github.io/" title="⌂ 0xnmo">
+                    <span>⌂ 0xnmo</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/posts/" title="▤ Posts">
+                    <span>▤ Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="◆ Tags">
+                    <span>◆ Tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://vicone.com" title="⌁ Pewpew!">
+                    <span>⌁ Pewpew!</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <nav class="breadcrumbs" role="navigation" aria-label="Breadcrumb">
+            <a href="http://localhost:1313/">Home</a>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+            <a href="http://localhost:1313/posts/">Posts</a>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</nav>
+    <h1 class="post-title entry-hint-parent">
+      Multi-Factor Authentication Bypass in OKX Android application via Exported WelcomeActivity
+    </h1>
+    <div class="post-meta">
+
+<span title='2023-02-02 00:15:53 +0800 +08'>February 2, 2023</span>&nbsp;·&nbsp;<span>2 min</span>&nbsp;·&nbsp;<span>394 words</span>&nbsp;·&nbsp;<span>Neil Mark Ochea</span>
+
+</div>
+  </header> 
+  <div class="post-content md-content"><h2 id="summary">Summary<a hidden class="anchor" aria-hidden="true" href="#summary">#</a></h2>
+<p>A broken multi-factor authentication vulnerability was discovered in OKX&rsquo;s Android application due to the <code>com.okinc.okex.welcome.WelcomeActivity</code> component being set to <code>android:exported=&quot;true&quot;</code>. Because this entry point is exported, any other application installed on the device can launch it directly with an explicit <code>Intent</code> instead of going through the app&rsquo;s normal startup flow. This skips the fingerprint-based multi-factor authentication check that OKX normally enforces when a user reopens the application after an existing session, letting a malicious application resume a logged-in OKX session without the user re-authenticating.</p>
+<h2 id="exploit">Exploit<a hidden class="anchor" aria-hidden="true" href="#exploit">#</a></h2>
+<p>An attacker locally triggers this vulnerability through a malicious &ldquo;OKX Bypass&rdquo; application installed on the victim&rsquo;s device.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="n">Intent</span><span class="w"> </span><span class="n">intent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Intent</span><span class="p">(</span><span class="s">&#34;android.intent.action.VIEW&#34;</span><span class="p">);</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">intent</span><span class="p">.</span><span class="na">setComponent</span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="n">ComponentName</span><span class="p">(</span><span class="s">&#34;com.okinc.okex.gp&#34;</span><span class="p">,</span><span class="s">&#34;com.okinc.okex.welcome.WelcomeActivity&#34;</span><span class="p">));</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="n">startActivity</span><span class="p">(</span><span class="n">intent</span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><h2 id="technical-details">Technical Details<a hidden class="anchor" aria-hidden="true" href="#technical-details">#</a></h2>
+<p><strong>In <code>AndroidManifest.xml</code>:</strong></p>
+<p>The <code>WelcomeActivity</code> registered with an <code>intent-filter</code> for <code>MAIN</code>/<code>LAUNCHER</code> it&rsquo;s also marked <code>exported=&quot;true&quot;</code>, which means Android will accept Intents sent to it from any other application on the device.</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-xml" data-lang="xml"><span class="line"><span class="cl"><span class="nt">&lt;activity</span> <span class="na">android:exported=</span><span class="s">&#34;true&#34;</span> <span class="na">android:name=</span><span class="s">&#34;com.okinc.okex.welcome.WelcomeActivity&#34;</span> <span class="na">android:screenOrientation=</span><span class="s">&#34;portrait&#34;</span> <span class="na">android:theme=</span><span class="s">&#34;@style/OKTheme.Launcher&#34;</span><span class="nt">&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;intent-filter&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;action</span> <span class="na">android:name=</span><span class="s">&#34;android.intent.action.MAIN&#34;</span> <span class="nt">/&gt;</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&lt;category</span> <span class="na">android:name=</span><span class="s">&#34;android.intent.category.LAUNCHER&#34;</span> <span class="nt">/&gt;</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&lt;/intent-filter&gt;</span>
+</span></span><span class="line"><span class="cl"><span class="nt">&lt;/activity&gt;</span>
+</span></span></code></pre></div><p>During testing, I used multi-window or background mode to launch the Bypass application while OKX had an authenticated session running. The Bypass application then fired an explicit <code>Intent</code> at <code>com.okinc.okex.welcome.WelcomeActivity</code>.</p>
+<p>OKX displayed a toast message saying &ldquo;Fingerprint Operation Failed.&rdquo; Based on this observed behavior, the existing session remained accessible without successfully completing the expected fingerprint authentication check.</p>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Exporting <code>WelcomeActivity</code> turns what should be an internal, app-controlled entry point into one any installed application can invoke directly, and that&rsquo;s enough to step around the fingerprint-based multi-factor authentication check OKX otherwise relies on. In practice, a user with a malicious application on their device can have their already-authenticated OKX session resumed without ever supplying valid credentials.</p>
+<h2 id="faq">FAQ<a hidden class="anchor" aria-hidden="true" href="#faq">#</a></h2>
+<p><strong>What is this?</strong>
+Multi-Factor Authentication Bypass on OKX&rsquo;s Android application.</p>
+<p><strong>How does it work?</strong>
+It&rsquo;s all in the Exploit and Technical Details sections above, read top to bottom.</p>
+<p><strong>Isn&rsquo;t it useless?</strong>
+Only if you don&rsquo;t have an OKX account and a shady APK on the same phone. If you do, it&rsquo;s a full walk-in to an already-logged-in account, no credentials, no fingerprint.</p>
+<p><strong>What&rsquo;s so bad about it?</strong>
+Normally reopening OKX after a session makes you prove it&rsquo;s you again. This skips that step entirely: an exported component that any installed application can hit directly, and the session just resumes. No password, no fingerprint, nothing.</p>
+<p><strong>Why?</strong>
+Because <code>WelcomeActivity</code> is exported and nothing re-checks the session when it&rsquo;s relaunched from outside the application.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+    <footer class="footer">
+    <span>&copy; 2026 Neilmark Ochea / 0xnmo</span>
+</footer></body>
+
+</html>

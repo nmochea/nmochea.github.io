@@ -24,7 +24,7 @@ goldmark:
     unsafe: true
 ---
 
-### **Summary**
+### Summary
 A **persistent open redirect** vulnerability was identified in Facebook’s mobile Push Notification endpoint, allowing attackers to bypass Linkshim and redirect users to malicious sites.
 
 ```
@@ -35,7 +35,7 @@ The issue **was caused by improper validation** of the **`?ref=` parameter**, wh
 
 ---
 
-### **Root Cause Analysis**
+### Root Cause Analysis
 
 When inspecting the source code of the push-notification page, a suspicious JavaScript object appeared:
 
@@ -70,7 +70,7 @@ This **broke the validation logic** and caused the browser to treat it as a vali
 This enabled a **full open redirect** to any external website.
 
 
-### **Attack Flow**
+### Attack Flow
 
 1. User clicks a **crafted URL** containing a malicious `ref` value.
 2. The server reads the **unsanitized `ref` parameter** and assigns it to `redirectUrl`.
@@ -79,7 +79,7 @@ This enabled a **full open redirect** to any external website.
 5. The browser interprets the payload as a **valid absolute external URL**.
 6. The user is **redirected to an attacker-controlled site** (phishing, malware, credential theft).
 
-### **Proof of Concept (PoC)**
+### Proof of Concept (PoC)
 
 A working payload that redirects users to `https://evil.com`:
 
@@ -104,7 +104,7 @@ and the **redirect triggers successfully**.
 Attempts to perform XSS on this endpoint failed due to **Facebook’s strict hex-encoding filters and Linkshim**, but the **open redirect itself is still a security concern**, especially for phishing.
 
 
-### **Steps to Reproduce**
+### Steps to Reproduce
 
 1. Visit the endpoint:
 
@@ -146,10 +146,29 @@ Attempts to perform XSS on this endpoint failed due to **Facebook’s strict hex
    https://evil.com
    ```
 
-### **Disclosure Timeline**
+### Disclosure Timeline
 
 * **September 22, 2020** — Reported to Facebook Whitehat
 * **September 23, 2020** — Facebook team reproduced and began investigation
 * **September 28, 2020** — Provided additional technical details
 * **October 08, 2020** — Patch deployed and vulnerability fixed
 * **October 21, 2020** — Bounty awarded
+
+## Conclusion
+A simple over-encoded triple-slash payload was enough to slip past Facebook's redirect validation and defeat Linkshim entirely. Normal and single-encoded payloads were caught, but stacking the encoding one layer further broke the domain check, and the browser resolved it into a clean external URL anyway. The result is a persistent open redirect on a trusted Facebook domain, which is exactly the kind of flaw phishing campaigns rely on since the link appears to come from Facebook itself.
+
+## FAQ
+**What is this?**
+Linkshim Bypass and Persistent Open Redirect via Double URL Encoding on Facebook's Push Notification Endpoint.
+
+**How does it work?**
+It's all in the Root Cause Analysis and Attack Flow sections above, read top to bottom.
+
+**Isn't it useless?**
+Not at all. The victim only needs to click a link that looks like it points to facebook.com. No application install, no special access, just a crafted `?ref=` value doing the work.
+
+**What's so bad about it?**
+Linkshim exists specifically to stop Facebook links from redirecting users to malicious sites, but this endpoint skipped that protection entirely. A URL that starts with a trusted facebook.com domain can still land the user on an attacker controlled page, which makes it far more convincing than a typical phishing link.
+
+**Why?**
+Because the `?ref=` parameter was validated against simple and single-encoded payloads, but a deeply encoded triple-slash value was enough to break that validation logic before the browser normalized and followed it. It's already fixed as of October 08, 2020, per the timeline above.

